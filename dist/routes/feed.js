@@ -7,5 +7,6 @@ const express_1 = __importDefault(require("express"));
 const feed_1 = require("../controllers/feed");
 const router = express_1.default.Router();
 router.get("/posts", feed_1.getPosts);
+router.post("/posts", feed_1.createPost);
 exports.default = router;
 //# sourceMappingURL=feed.js.map
