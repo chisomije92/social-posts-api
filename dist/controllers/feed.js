@@ -26,10 +26,10 @@ exports.getPosts = getPosts;
 const createPost = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({
-            message: "Validation failed, entered data is incorrect",
-            errors: errors.array(),
-        });
+        const error = new Error("Validation failed, entered data is incorrect");
+        // @ts-ignore
+        error.statusCode = 422;
+        throw error;
     }
     const { title, content } = req.body;
     const post = new post_1.default({
@@ -49,7 +49,10 @@ const createPost = (req, res, next) => {
         });
     })
         .catch((err) => {
-        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
     });
 };
 exports.createPost = createPost;
