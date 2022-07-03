@@ -3,20 +3,19 @@ import { validationResult } from "express-validator";
 import Post from "../models/post";
 
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json({
-    posts: [
-      {
-        _id: 1,
-        title: "My first post",
-        content: "This is my first post",
-        imageUrl: "images/pizza.png",
-        creator: {
-          name: "John Doe",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  });
+  Post.find()
+    .then((posts) => {
+      res.status(200).json({
+        message: "Posts fetched successfully",
+        posts: posts,
+      });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 
 export const createPost = (req: Request, res: Response, next: NextFunction) => {
@@ -43,6 +42,26 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
         message: "Post created successfully",
         post: result,
       });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+export const getPost = (req: Request, res: Response, next: NextFunction) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error = new Error("Could not find post.");
+        //@ts-ignore
+        error.statusCode = 404;
+        throw error;
+      }
+      res.status(200).json({ message: "post fetched", post: post });
     })
     .catch((err) => {
       if (!err.statusCode) {

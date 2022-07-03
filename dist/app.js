@@ -23,6 +23,7 @@ const app = (0, express_1.default)();
 // app.use(bodyParser.json());
 app.use(express_1.default.json());
 app.use("/images", express_1.default.static(path_1.default.join(__dirname, "images")));
+// app.use(express.static(path.join(__dirname, "dist")));
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE");

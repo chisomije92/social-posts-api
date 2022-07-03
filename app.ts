@@ -21,6 +21,7 @@ const app = express();
 // app.use(bodyParser.json());
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
+// app.use(express.static(path.join(__dirname, "dist")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

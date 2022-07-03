@@ -3,23 +3,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPost = exports.getPosts = void 0;
+exports.getPost = exports.createPost = exports.getPosts = void 0;
 const express_validator_1 = require("express-validator");
 const post_1 = __importDefault(require("../models/post"));
 const getPosts = (req, res, next) => {
-    res.status(200).json({
-        posts: [
-            {
-                _id: 1,
-                title: "My first post",
-                content: "This is my first post",
-                imageUrl: "images/pizza.png",
-                creator: {
-                    name: "John Doe",
-                },
-                createdAt: new Date(),
-            },
-        ],
+    post_1.default.find()
+        .then((posts) => {
+        res.status(200).json({
+            message: "Posts fetched successfully",
+            posts: posts,
+        });
+    })
+        .catch((err) => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
     });
 };
 exports.getPosts = getPosts;
@@ -56,4 +55,24 @@ const createPost = (req, res, next) => {
     });
 };
 exports.createPost = createPost;
+const getPost = (req, res, next) => {
+    const postId = req.params.postId;
+    post_1.default.findById(postId)
+        .then((post) => {
+        if (!post) {
+            const error = new Error("Could not find post.");
+            //@ts-ignore
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({ message: "post fetched", post: post });
+    })
+        .catch((err) => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
+exports.getPost = getPost;
 //# sourceMappingURL=feed.js.map
