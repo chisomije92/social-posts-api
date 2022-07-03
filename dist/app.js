@@ -8,7 +8,8 @@ const feed_1 = __importDefault(require("./routes/feed"));
 // import bodyParser from "body-parser";
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const path_1 = __importDefault(require("path"));
+const multer_1 = __importDefault(require("multer"));
+const uuid_1 = require("uuid");
 dotenv_1.default.config();
 let conn_string;
 if (process.env.MONGO_CONN_STRING) {
@@ -18,12 +19,31 @@ else {
     throw new Error("MONGO_CONN_STRING is not set");
 }
 const app = (0, express_1.default)();
-// const __dirname = path.resolve();
-// console.log(__dirname);
-// app.use(bodyParser.json());
+const fileStorage = multer_1.default.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "images");
+    },
+    filename: (req, file, cb) => {
+        cb(null, (0, uuid_1.v4)() + "-" + file.originalname);
+    },
+});
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg" ||
+        file.mimetype === "image/jpeg") {
+        cb(null, true);
+    }
+    else {
+        cb(null, false);
+    }
+};
 app.use(express_1.default.json());
-app.use("/images", express_1.default.static(path_1.default.join(__dirname, "images")));
-// app.use(express.static(path.join(__dirname, "dist")));
+// app.use("/images", express.static(path.join(__dirname, "images")));
+app.use((0, multer_1.default)({
+    storage: fileStorage,
+    fileFilter: fileFilter,
+}).single("image"));
+app.use("/images", express_1.default.static("images"));
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE");

@@ -30,11 +30,18 @@ const createPost = (req, res, next) => {
         error.statusCode = 422;
         throw error;
     }
+    if (!req.file) {
+        const error = new Error("No image provided");
+        // @ts-ignore
+        error.statusCode = 422;
+        throw error;
+    }
     const { title, content } = req.body;
+    const imageUrl = req.file.path.replace("\\", "/");
     const post = new post_1.default({
         title: title,
         content: content,
-        imageUrl: "images/pizza.png",
+        imageUrl: imageUrl,
         creator: {
             name: "John Doe",
         },

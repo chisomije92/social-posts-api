@@ -4,6 +4,8 @@ import { Request, Response, NextFunction } from "express";
 // import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
 import path from "path";
 
 dotenv.config();
@@ -16,13 +18,42 @@ if (process.env.MONGO_CONN_STRING) {
 
 const app = express();
 
-// const __dirname = path.resolve();
-// console.log(__dirname);
-// app.use(bodyParser.json());
-app.use(express.json());
-app.use("/images", express.static(path.join(__dirname, "images")));
-// app.use(express.static(path.join(__dirname, "dist")));
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, uuidv4() + "-" + file.originalname);
+  },
+});
 
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+app.use(express.json());
+
+// app.use("/images", express.static(path.join(__dirname, "images")));
+
+app.use(
+  multer({
+    storage: fileStorage,
+    fileFilter: fileFilter,
+  }).single("image")
+);
+app.use("/images", express.static("images"));
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
