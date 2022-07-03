@@ -4,8 +4,14 @@ export const getPosts = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json({
     posts: [
       {
+        _id: 1,
         title: "My first post",
         content: "This is my first post",
+        imageUrl: "images/pizza.png",
+        creator: {
+          name: "John Doe",
+        },
+        createdAt: new Date(),
       },
     ],
   });
