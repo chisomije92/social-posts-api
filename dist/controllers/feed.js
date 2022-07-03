@@ -9,11 +9,26 @@ const post_1 = __importDefault(require("../models/post"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const getPosts = (req, res, next) => {
+    let queryPage;
+    if (req.query && req.query.page) {
+        queryPage = +req.query.page;
+    }
+    const currentPage = queryPage || 1;
+    const perPage = 2;
+    let totalItems;
     post_1.default.find()
+        .countDocuments()
+        .then((num) => {
+        totalItems = num;
+        return post_1.default.find()
+            .skip((currentPage - 1) * perPage)
+            .limit(perPage);
+    })
         .then((posts) => {
         res.status(200).json({
-            message: "Posts fetched successfully",
+            message: "Posts fetched successfully!",
             posts: posts,
+            totalItems: totalItems,
         });
     })
         .catch((err) => {

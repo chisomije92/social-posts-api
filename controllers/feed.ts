@@ -5,11 +5,26 @@ import fs from "fs";
 import path from "path";
 
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
+  let queryPage;
+  if (req.query && req.query.page) {
+    queryPage = +req.query.page;
+  }
+  const currentPage: number = queryPage || 1;
+  const perPage = 2;
+  let totalItems: number;
   Post.find()
+    .countDocuments()
+    .then((num) => {
+      totalItems = num;
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((posts) => {
       res.status(200).json({
-        message: "Posts fetched successfully",
+        message: "Posts fetched successfully!",
         posts: posts,
+        totalItems: totalItems,
       });
     })
     .catch((err) => {
