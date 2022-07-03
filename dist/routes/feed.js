@@ -13,5 +13,9 @@ router.post("/posts", [
     (0, express_validator_1.body)("content").trim().isLength({ min: 5 }),
 ], feed_1.createPost);
 router.get("/posts/:postId", feed_1.getPost);
+router.put("/posts/:postId", [
+    (0, express_validator_1.body)("title").trim().isLength({ min: 5 }),
+    (0, express_validator_1.body)("content").trim().isLength({ min: 5 }),
+], feed_1.updatePost);
 exports.default = router;
 //# sourceMappingURL=feed.js.map
