@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPost = exports.getPosts = void 0;
 const express_validator_1 = require("express-validator");
+const post_1 = __importDefault(require("../models/post"));
 const getPosts = (req, res, next) => {
     res.status(200).json({
         posts: [
@@ -28,17 +32,24 @@ const createPost = (req, res, next) => {
         });
     }
     const { title, content } = req.body;
-    res.status(201).json({
-        message: "Post created successfully",
-        post: {
-            _id: new Date().toISOString(),
-            title,
-            content,
-            creator: {
-                name: "John Doe",
-            },
-            createdAt: new Date(),
+    const post = new post_1.default({
+        title: title,
+        content: content,
+        imageUrl: "images/pizza.png",
+        creator: {
+            name: "John Doe",
         },
+    });
+    post
+        .save()
+        .then((result) => {
+        res.status(201).json({
+            message: "Post created successfully",
+            post: result,
+        });
+    })
+        .catch((err) => {
+        console.log(err);
     });
 };
 exports.createPost = createPost;
