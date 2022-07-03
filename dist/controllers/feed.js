@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePost = exports.getPost = exports.createPost = exports.getPosts = void 0;
+exports.deletePost = exports.updatePost = exports.getPost = exports.createPost = exports.getPosts = void 0;
 const express_validator_1 = require("express-validator");
 const post_1 = __importDefault(require("../models/post"));
 const fs_1 = __importDefault(require("fs"));
@@ -134,8 +134,34 @@ const updatePost = (req, res, next) => {
     });
 };
 exports.updatePost = updatePost;
+const deletePost = (req, res, next) => {
+    const postId = req.params.postId;
+    post_1.default.findById(postId)
+        .then((post) => {
+        if (!post) {
+            const error = new Error("Could not find post.");
+            //@ts-ignore
+            error.statusCode = 404;
+            throw error;
+        }
+        clearImage(post.imageUrl);
+        return post_1.default.findByIdAndRemove(postId);
+    })
+        .then((result) => {
+        res.status(200).json({
+            message: "Post deleted successfully",
+        });
+    })
+        .catch((err) => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+};
+exports.deletePost = deletePost;
 const clearImage = (imagePath) => {
-    imagePath = path_1.default.join(__dirname, "..", imagePath);
+    imagePath = path_1.default.join(__dirname, "../../", imagePath);
     fs_1.default.unlink(imagePath, (err) => console.log(err));
 };
 //# sourceMappingURL=feed.js.map

@@ -1,5 +1,11 @@
 import express from "express";
-import { createPost, getPost, getPosts, updatePost } from "../controllers/feed";
+import {
+  createPost,
+  deletePost,
+  getPost,
+  getPosts,
+  updatePost,
+} from "../controllers/feed";
 import { body } from "express-validator";
 const router = express.Router();
 
@@ -21,4 +27,6 @@ router.put(
   ],
   updatePost
 );
+
+router.delete("/posts/:postId", deletePost);
 export default router;
