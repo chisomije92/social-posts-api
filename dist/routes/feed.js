@@ -6,8 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const feed_1 = require("../controllers/feed");
 const express_validator_1 = require("express-validator");
+const is_auth_1 = __importDefault(require("../middleware/is-auth"));
 const router = express_1.default.Router();
-router.get("/posts", feed_1.getPosts);
+router.get("/posts", is_auth_1.default, feed_1.getPosts);
 router.post("/posts", [
     (0, express_validator_1.body)("title").trim().isLength({ min: 5 }),
     (0, express_validator_1.body)("content").trim().isLength({ min: 5 }),
