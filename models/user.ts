@@ -23,7 +23,7 @@ const UserSchema = new Schema({
   },
   status: {
     type: String,
-    required: true,
+    default: "I am new!",
   },
   name: {
     type: String,
