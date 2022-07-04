@@ -13,11 +13,11 @@ router.post("/posts", [
     (0, express_validator_1.body)("title").trim().isLength({ min: 5 }),
     (0, express_validator_1.body)("content").trim().isLength({ min: 5 }),
 ], feed_1.createPost);
-router.get("/posts/:postId", feed_1.getPost);
-router.put("/posts/:postId", [
+router.get("/posts/:postId", is_auth_1.default, feed_1.getPost);
+router.put("/posts/:postId", is_auth_1.default, [
     (0, express_validator_1.body)("title").trim().isLength({ min: 5 }),
     (0, express_validator_1.body)("content").trim().isLength({ min: 5 }),
 ], feed_1.updatePost);
-router.delete("/posts/:postId", feed_1.deletePost);
+router.delete("/posts/:postId", is_auth_1.default, feed_1.deletePost);
 exports.default = router;
 //# sourceMappingURL=feed.js.map

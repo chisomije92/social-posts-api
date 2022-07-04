@@ -19,9 +19,10 @@ router.post(
   ],
   createPost
 );
-router.get("/posts/:postId", getPost);
+router.get("/posts/:postId", isAuth, getPost);
 router.put(
   "/posts/:postId",
+  isAuth,
   [
     body("title").trim().isLength({ min: 5 }),
     body("content").trim().isLength({ min: 5 }),
@@ -29,5 +30,5 @@ router.put(
   updatePost
 );
 
-router.delete("/posts/:postId", deletePost);
+router.delete("/posts/:postId", isAuth, deletePost);
 export default router;
