@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
-import Post from "../models/post";
+import Post, { PostType } from "../models/post";
 import User from "../models/user";
 import fs from "fs";
 import path from "path";
+import { Types } from "mongoose";
 
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
   let queryPage;
@@ -182,6 +183,20 @@ export const deletePost = (req: Request, res: Response, next: NextFunction) => {
       }
       clearImage(post.imageUrl);
       return Post.findByIdAndRemove(postId);
+    })
+    .then((result) => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      if (!user) {
+        const error = new Error("Could not find user.");
+        //@ts-ignore
+        error.statusCode = 404;
+        throw error;
+      }
+      const userData = user.posts as Types.DocumentArray<PostType>;
+      userData.pull(postId);
+      return user.save();
     })
     .then((result) => {
       res.status(200).json({

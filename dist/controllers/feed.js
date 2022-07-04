@@ -189,6 +189,20 @@ const deletePost = (req, res, next) => {
         return post_1.default.findByIdAndRemove(postId);
     })
         .then((result) => {
+        return user_1.default.findById(req.userId);
+    })
+        .then((user) => {
+        if (!user) {
+            const error = new Error("Could not find user.");
+            //@ts-ignore
+            error.statusCode = 404;
+            throw error;
+        }
+        const userData = user.posts;
+        userData.pull(postId);
+        return user.save();
+    })
+        .then((result) => {
         res.status(200).json({
             message: "Post deleted successfully",
         });
