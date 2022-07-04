@@ -1,5 +1,6 @@
 import express from "express";
 import feedRoutes from "./routes/feed";
+import authRoutes from "./routes/auth";
 import { Request, Response, NextFunction } from "express";
 // import bodyParser from "body-parser";
 import mongoose from "mongoose";
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", feedRoutes);
+app.use("/auth", authRoutes);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.log(error);

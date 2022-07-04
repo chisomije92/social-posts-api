@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const feed_1 = __importDefault(require("./routes/feed"));
+const auth_1 = __importDefault(require("./routes/auth"));
 // import bodyParser from "body-parser";
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -51,6 +52,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use("/feed", feed_1.default);
+app.use("/auth", auth_1.default);
 app.use((error, req, res, next) => {
     console.log(error);
     const status = error.statusCode || 500;
