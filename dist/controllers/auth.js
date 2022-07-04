@@ -9,6 +9,7 @@ const express_validator_1 = require("express-validator");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const custom_error_1 = require("../utils/custom-error");
 dotenv_1.default.config();
 let secret;
 if (process.env.JWT_SECRET) {
@@ -20,9 +21,9 @@ else {
 const signup = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
-        const error = new Error("Validation failed, entered data is incorrect");
-        error.statusCode = 422;
-        error.data = errors.array();
+        const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422, errors.array());
+        // error.statusCode = 422;
+        // error.data = errors.array();
         throw error;
     }
     const { name, email, password } = req.body;
@@ -63,9 +64,10 @@ const login = (req, res, next) => {
         loadedUser = user;
         bcryptjs_1.default.compare(password, user.password).then((isEqual) => {
             if (!isEqual) {
-                const error = new Error("Wrong password!");
-                //@ts-ignore
-                error.statusCode = 401;
+                const error = new custom_error_1.CustomError("Wrong password!", 401);
+                //   const error = new Error("Wrong password!");
+                //   //@ts-ignore
+                //   error.statusCode = 401;
                 throw error;
             }
             const token = jsonwebtoken_1.default.sign({
@@ -82,9 +84,9 @@ const login = (req, res, next) => {
         });
     })
         .catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
+        //   if (!err.statusCode) {
+        //     err.statusCode = 500;
+        //   }
         next(err);
     });
 };

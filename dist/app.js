@@ -11,6 +11,8 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const multer_1 = __importDefault(require("multer"));
 const uuid_1 = require("uuid");
+const path_1 = __importDefault(require("path"));
+const custom_error_1 = require("./utils/custom-error");
 dotenv_1.default.config();
 let conn_string;
 if (process.env.MONGO_CONN_STRING) {
@@ -39,7 +41,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 app.use(express_1.default.json());
-// app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/images", express_1.default.static(path_1.default.join(__dirname, "../", "images")));
 app.use((0, multer_1.default)({
     storage: fileStorage,
     fileFilter: fileFilter,
@@ -55,10 +57,8 @@ app.use("/feed", feed_1.default);
 app.use("/auth", auth_1.default);
 app.use((error, req, res, next) => {
     console.log(error);
-    const status = error.statusCode || 500;
-    const message = error.message;
-    const data = error.data;
-    res.status(status).json({ message: message, data: data });
+    const err = new custom_error_1.CustomError(error.message, error.statusCode || 500, error.data);
+    res.status(err.statusCode).json({ message: err.message, data: err.data });
 });
 mongoose_1.default
     .connect(process.env.MONGO_CONN_STRING)

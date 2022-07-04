@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
+import { CustomError } from "./utils/custom-error";
 
 dotenv.config();
 let conn_string: string;
@@ -46,7 +47,7 @@ const fileFilter = (
 
 app.use(express.json());
 
-// app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(path.join(__dirname, "../", "images")));
 
 app.use(
   multer({
@@ -68,13 +69,17 @@ app.use((req, res, next) => {
 app.use("/feed", feedRoutes);
 app.use("/auth", authRoutes);
 
-app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  console.log(error);
-  const status = error.statusCode || 500;
-  const message = error.message;
-  const data = error.data;
-  res.status(status).json({ message: message, data: data });
-});
+app.use(
+  (error: CustomError, req: Request, res: Response, next: NextFunction) => {
+    console.log(error);
+    const err = new CustomError(
+      error.message,
+      error.statusCode || 500,
+      error.data
+    );
+    res.status(err.statusCode).json({ message: err.message, data: err.data });
+  }
+);
 
 mongoose
   .connect(process.env.MONGO_CONN_STRING)

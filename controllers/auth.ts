@@ -4,9 +4,10 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { CustomError } from "../utils/custom-error";
 
 dotenv.config();
-let secret: any;
+let secret: string;
 
 if (process.env.JWT_SECRET) {
   secret = process.env.JWT_SECRET;
@@ -16,11 +17,13 @@ if (process.env.JWT_SECRET) {
 export const signup = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error: any = new Error(
-      "Validation failed, entered data is incorrect"
+    const error: CustomError = new CustomError(
+      "Validation failed, entered data is incorrect",
+      422,
+      errors.array()
     );
-    error.statusCode = 422;
-    error.data = errors.array();
+    // error.statusCode = 422;
+    // error.data = errors.array();
     throw error;
   }
   const { name, email, password } = req.body;
@@ -39,7 +42,7 @@ export const signup = (req: Request, res: Response, next: NextFunction) => {
         });
       });
     })
-    .catch((err) => {
+    .catch((err: CustomError) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
@@ -62,9 +65,10 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
 
       bcrypt.compare(password, user.password).then((isEqual) => {
         if (!isEqual) {
-          const error = new Error("Wrong password!");
-          //@ts-ignore
-          error.statusCode = 401;
+          const error = new CustomError("Wrong password!", 401);
+          //   const error = new Error("Wrong password!");
+          //   //@ts-ignore
+          //   error.statusCode = 401;
           throw error;
         }
         const token = jwt.sign(
@@ -84,10 +88,10 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
         });
       });
     })
-    .catch((err) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
+    .catch((err: CustomError) => {
+      //   if (!err.statusCode) {
+      //     err.statusCode = 500;
+      //   }
       next(err);
     });
 };

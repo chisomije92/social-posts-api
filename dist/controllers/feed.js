@@ -9,6 +9,7 @@ const post_1 = __importDefault(require("../models/post"));
 const user_1 = __importDefault(require("../models/user"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
+const custom_error_1 = require("../utils/custom-error");
 const getPosts = (req, res, next) => {
     let queryPage;
     if (req.query && req.query.page) {
@@ -33,9 +34,6 @@ const getPosts = (req, res, next) => {
         });
     })
         .catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
         next(err);
     });
 };
@@ -43,15 +41,11 @@ exports.getPosts = getPosts;
 const createPost = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
-        const error = new Error("Validation failed, entered data is incorrect");
-        // @ts-ignore
-        error.statusCode = 422;
+        const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422, errors.array());
         throw error;
     }
     if (!req.file) {
-        const error = new Error("No image provided");
-        // @ts-ignore
-        error.statusCode = 422;
+        const error = new custom_error_1.CustomError("No image provided", 422);
         throw error;
     }
     const { title, content } = req.body;
@@ -78,15 +72,12 @@ const createPost = (req, res, next) => {
             message: "Post created successfully",
             post: post,
             creator: {
-                _id: creator._id,
-                name: creator.name,
+                _id: creator === null || creator === void 0 ? void 0 : creator._id,
+                name: creator === null || creator === void 0 ? void 0 : creator.name,
             },
         });
     })
         .catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
         next(err);
     });
 };
@@ -96,17 +87,12 @@ const getPost = (req, res, next) => {
     post_1.default.findById(postId)
         .then((post) => {
         if (!post) {
-            const error = new Error("Could not find post.");
-            //@ts-ignore
-            error.statusCode = 404;
+            const error = new custom_error_1.CustomError("Could not find post.", 404);
             throw error;
         }
         res.status(200).json({ message: "post fetched", post: post });
     })
         .catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
         next(err);
     });
 };
@@ -135,15 +121,11 @@ const updatePost = (req, res, next) => {
         .then((post) => {
         var _a;
         if (!post) {
-            const error = new Error("Could not find post.");
-            //@ts-ignore
-            error.statusCode = 404;
+            const error = new custom_error_1.CustomError("Could not find post.", 404);
             throw error;
         }
         if (post.creator.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
-            const error = new Error("Not authorized");
-            //@ts-ignore
-            error.statusCode = 403;
+            const error = new custom_error_1.CustomError("Not authorized", 403);
             throw error;
         }
         if (imageUrl !== post.imageUrl) {
@@ -161,9 +143,6 @@ const updatePost = (req, res, next) => {
         });
     })
         .catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
         next(err);
     });
 };
@@ -174,15 +153,11 @@ const deletePost = (req, res, next) => {
         .then((post) => {
         var _a;
         if (!post) {
-            const error = new Error("Could not find post.");
-            //@ts-ignore
-            error.statusCode = 404;
+            const error = new custom_error_1.CustomError("Could not find post.", 404);
             throw error;
         }
         if (post.creator.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
-            const error = new Error("Not authorized");
-            //@ts-ignore
-            error.statusCode = 403;
+            const error = new custom_error_1.CustomError("Not authorized", 403);
             throw error;
         }
         clearImage(post.imageUrl);
@@ -193,9 +168,7 @@ const deletePost = (req, res, next) => {
     })
         .then((user) => {
         if (!user) {
-            const error = new Error("Could not find user.");
-            //@ts-ignore
-            error.statusCode = 404;
+            const error = new custom_error_1.CustomError("Could not find user.", 404);
             throw error;
         }
         const userData = user.posts;
@@ -208,9 +181,6 @@ const deletePost = (req, res, next) => {
         });
     })
         .catch((err) => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
         next(err);
     });
 };
