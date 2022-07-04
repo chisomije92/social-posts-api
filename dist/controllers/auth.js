@@ -7,6 +7,16 @@ exports.login = exports.signup = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const express_validator_1 = require("express-validator");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+let secret;
+if (process.env.JWT_SECRET) {
+    secret = process.env.JWT_SECRET;
+}
+else {
+    throw new Error("JWT_SECRET is not set");
+}
 const signup = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
@@ -41,22 +51,34 @@ const signup = (req, res, next) => {
 exports.signup = signup;
 const login = (req, res, next) => {
     const { email, password } = req.body;
+    let loadedUser;
     user_1.default.findOne({ email: email })
-        .then((userDoc) => {
-        if (!userDoc) {
+        .then((user) => {
+        if (!user) {
             const error = new Error("Could not find user.");
             //@ts-ignore
             error.statusCode = 404;
             throw error;
         }
-        bcryptjs_1.default.compare(password, userDoc.password).then((isEqual) => {
+        loadedUser = user;
+        bcryptjs_1.default.compare(password, user.password).then((isEqual) => {
             if (!isEqual) {
                 const error = new Error("Wrong password!");
                 //@ts-ignore
                 error.statusCode = 401;
                 throw error;
             }
-            res.status(200).json({ message: "Successfully logged in!" });
+            const token = jsonwebtoken_1.default.sign({
+                email: loadedUser.email,
+                id: loadedUser._id.toString(),
+            }, secret, {
+                expiresIn: "1h",
+            });
+            res.status(200).json({
+                message: "Successfully logged in!",
+                token,
+                userId: loadedUser._id.toString(),
+            });
         });
     })
         .catch((err) => {
