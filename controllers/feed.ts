@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/post";
+import User from "../models/user";
 import fs from "fs";
 import path from "path";
 
@@ -52,20 +53,31 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   }
   const { title, content } = req.body;
   const imageUrl = req.file.path.replace("\\", "/");
+  let creator: any;
   const post = new Post({
     title: title,
     content: content,
     imageUrl: imageUrl,
-    creator: {
-      name: "John Doe",
-    },
+    creator: req.userId,
   });
   post
     .save()
     .then((result) => {
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      creator = user;
+      user?.posts.push(post);
+      return user?.save();
+    })
+    .then((result) => {
       res.status(201).json({
         message: "Post created successfully",
-        post: result,
+        post: post,
+        creator: {
+          _id: creator._id,
+          name: creator.name,
+        },
       });
     })
     .catch((err) => {

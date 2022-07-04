@@ -9,7 +9,7 @@ const express_validator_1 = require("express-validator");
 const is_auth_1 = __importDefault(require("../middleware/is-auth"));
 const router = express_1.default.Router();
 router.get("/posts", is_auth_1.default, feed_1.getPosts);
-router.post("/posts", [
+router.post("/posts", is_auth_1.default, [
     (0, express_validator_1.body)("title").trim().isLength({ min: 5 }),
     (0, express_validator_1.body)("content").trim().isLength({ min: 5 }),
 ], feed_1.createPost);

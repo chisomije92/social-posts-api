@@ -19,7 +19,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
     error.statusCode = 401;
     throw error;
   }
-  console.log(authHeader);
+
   const token: string = authHeader.split(" ")[1];
   let decodedToken: any;
   try {
@@ -34,6 +34,6 @@ export default (req: Request, res: Response, next: NextFunction) => {
     const error = new Error("Not authenticated");
     throw error;
   }
-  req.userId = decodedToken.userId;
+  req.userId = decodedToken.id;
   next();
 };

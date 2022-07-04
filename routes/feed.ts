@@ -13,6 +13,7 @@ const router = express.Router();
 router.get("/posts", isAuth, getPosts);
 router.post(
   "/posts",
+  isAuth,
   [
     body("title").trim().isLength({ min: 5 }),
     body("content").trim().isLength({ min: 5 }),

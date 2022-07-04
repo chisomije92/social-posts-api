@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePost = exports.updatePost = exports.getPost = exports.createPost = exports.getPosts = void 0;
 const express_validator_1 = require("express-validator");
 const post_1 = __importDefault(require("../models/post"));
+const user_1 = __importDefault(require("../models/user"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const getPosts = (req, res, next) => {
@@ -55,20 +56,31 @@ const createPost = (req, res, next) => {
     }
     const { title, content } = req.body;
     const imageUrl = req.file.path.replace("\\", "/");
+    let creator;
     const post = new post_1.default({
         title: title,
         content: content,
         imageUrl: imageUrl,
-        creator: {
-            name: "John Doe",
-        },
+        creator: req.userId,
     });
     post
         .save()
         .then((result) => {
+        return user_1.default.findById(req.userId);
+    })
+        .then((user) => {
+        creator = user;
+        user === null || user === void 0 ? void 0 : user.posts.push(post);
+        return user === null || user === void 0 ? void 0 : user.save();
+    })
+        .then((result) => {
         res.status(201).json({
             message: "Post created successfully",
-            post: result,
+            post: post,
+            creator: {
+                _id: creator._id,
+                name: creator.name,
+            },
         });
     })
         .catch((err) => {
