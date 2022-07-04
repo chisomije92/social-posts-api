@@ -7,32 +7,32 @@ import path from "path";
 import { Types } from "mongoose";
 import { CustomError } from "../utils/custom-error";
 
-export const getPosts = (req: Request, res: Response, next: NextFunction) => {
+export const getPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   let queryPage;
   if (req.query && req.query.page) {
     queryPage = +req.query.page;
   }
   const currentPage: number = queryPage || 1;
   const perPage = 2;
-  let totalItems: number;
-  Post.find()
-    .countDocuments()
-    .then((num) => {
-      totalItems = num;
-      return Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((posts) => {
-      res.status(200).json({
-        message: "Posts fetched successfully!",
-        posts: posts,
-        totalItems: totalItems,
-      });
-    })
-    .catch((err: CustomError) => {
-      next(err);
+  //   let totalItems: number;
+  try {
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+
+    res.status(200).json({
+      message: "Posts fetched successfully!",
+      posts: posts,
+      totalItems: totalItems,
     });
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const createPost = (req: Request, res: Response, next: NextFunction) => {
@@ -106,9 +106,11 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
   const postId = req.params.postId;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error = new Error("Validation failed, entered data is incorrect");
-    // @ts-ignore
-    error.statusCode = 422;
+    const error = new CustomError(
+      "Validation failed, entered data is incorrect",
+      422
+    );
+
     throw error;
   }
   const { title, content } = req.body;
@@ -117,9 +119,7 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
     imageUrl = req.file.path.replace("\\", "/");
   }
   if (!imageUrl) {
-    const error = new Error("No image provided");
-    // @ts-ignore
-    error.statusCode = 422;
+    const error = new CustomError("No image provided", 422);
     throw error;
   }
   Post.findById(postId)

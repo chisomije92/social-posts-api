@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10,33 +19,29 @@ const user_1 = __importDefault(require("../models/user"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const custom_error_1 = require("../utils/custom-error");
-const getPosts = (req, res, next) => {
+const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     let queryPage;
     if (req.query && req.query.page) {
         queryPage = +req.query.page;
     }
     const currentPage = queryPage || 1;
     const perPage = 2;
-    let totalItems;
-    post_1.default.find()
-        .countDocuments()
-        .then((num) => {
-        totalItems = num;
-        return post_1.default.find()
+    //   let totalItems: number;
+    try {
+        const totalItems = yield post_1.default.find().countDocuments();
+        const posts = yield post_1.default.find()
             .skip((currentPage - 1) * perPage)
             .limit(perPage);
-    })
-        .then((posts) => {
         res.status(200).json({
             message: "Posts fetched successfully!",
             posts: posts,
             totalItems: totalItems,
         });
-    })
-        .catch((err) => {
+    }
+    catch (err) {
         next(err);
-    });
-};
+    }
+});
 exports.getPosts = getPosts;
 const createPost = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
@@ -104,9 +109,7 @@ const updatePost = (req, res, next) => {
     const postId = req.params.postId;
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
-        const error = new Error("Validation failed, entered data is incorrect");
-        // @ts-ignore
-        error.statusCode = 422;
+        const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422);
         throw error;
     }
     const { title, content } = req.body;
@@ -115,9 +118,7 @@ const updatePost = (req, res, next) => {
         imageUrl = req.file.path.replace("\\", "/");
     }
     if (!imageUrl) {
-        const error = new Error("No image provided");
-        // @ts-ignore
-        error.statusCode = 422;
+        const error = new custom_error_1.CustomError("No image provided", 422);
         throw error;
     }
     post_1.default.findById(postId)
