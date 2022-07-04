@@ -42,6 +42,9 @@ const createPost = (req, res, next) => {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422, errors.array());
+        if (req.file) {
+            clearImage(req.file.path);
+        }
         throw error;
     }
     if (!req.file) {

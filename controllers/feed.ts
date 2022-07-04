@@ -43,13 +43,14 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
       422,
       errors.array()
     );
-
+    if (req.file) {
+      clearImage(req.file.path);
+    }
     throw error;
   }
 
   if (!req.file) {
     const error = new CustomError("No image provided", 422);
-
     throw error;
   }
   const { title, content } = req.body;
