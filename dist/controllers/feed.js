@@ -133,10 +133,17 @@ const updatePost = (req, res, next) => {
     }
     post_1.default.findById(postId)
         .then((post) => {
+        var _a;
         if (!post) {
             const error = new Error("Could not find post.");
             //@ts-ignore
             error.statusCode = 404;
+            throw error;
+        }
+        if (post.creator.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
+            const error = new Error("Not authorized");
+            //@ts-ignore
+            error.statusCode = 403;
             throw error;
         }
         if (imageUrl !== post.imageUrl) {
@@ -165,10 +172,17 @@ const deletePost = (req, res, next) => {
     const postId = req.params.postId;
     post_1.default.findById(postId)
         .then((post) => {
+        var _a;
         if (!post) {
             const error = new Error("Could not find post.");
             //@ts-ignore
             error.statusCode = 404;
+            throw error;
+        }
+        if (post.creator.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
+            const error = new Error("Not authorized");
+            //@ts-ignore
+            error.statusCode = 403;
             throw error;
         }
         clearImage(post.imageUrl);

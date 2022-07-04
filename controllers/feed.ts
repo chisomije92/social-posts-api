@@ -136,6 +136,12 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
         error.statusCode = 404;
         throw error;
       }
+      if (post.creator.toString() !== req.userId?.toString()) {
+        const error = new Error("Not authorized");
+        //@ts-ignore
+        error.statusCode = 403;
+        throw error;
+      }
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
@@ -166,6 +172,12 @@ export const deletePost = (req: Request, res: Response, next: NextFunction) => {
         const error = new Error("Could not find post.");
         //@ts-ignore
         error.statusCode = 404;
+        throw error;
+      }
+      if (post.creator.toString() !== req.userId?.toString()) {
+        const error = new Error("Not authorized");
+        //@ts-ignore
+        error.statusCode = 403;
         throw error;
       }
       clearImage(post.imageUrl);
