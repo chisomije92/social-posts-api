@@ -23,5 +23,6 @@ router.put("/signup", [
     (0, express_validator_1.body)("password").trim().isLength({ min: 5 }),
     (0, express_validator_1.body)("password").trim().not().isEmpty(),
 ], auth_1.signup);
+router.post("/login", auth_1.login);
 exports.default = router;
 //# sourceMappingURL=auth.js.map
