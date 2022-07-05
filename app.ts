@@ -9,6 +9,8 @@ import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { CustomError } from "./utils/custom-error";
+import { Server } from "socket.io";
+import { createServer } from "http";
 
 dotenv.config();
 let conn_string: string;
@@ -84,7 +86,14 @@ app.use(
 mongoose
   .connect(process.env.MONGO_CONN_STRING)
   .then(() => {
-    app.listen(8080);
+    // const io = new Server(app);
+    // app.listen(8080);
+    const httpServer = createServer(app);
+    const io = new Server(httpServer);
+    httpServer.listen(8080);
+    io.on("connection", (socket) => {
+        console.log("New client connected");
+    }
   })
   .catch((err) => {
     console.log(err);

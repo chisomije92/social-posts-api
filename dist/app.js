@@ -13,6 +13,8 @@ const multer_1 = __importDefault(require("multer"));
 const uuid_1 = require("uuid");
 const path_1 = __importDefault(require("path"));
 const custom_error_1 = require("./utils/custom-error");
+const socket_io_1 = require("socket.io");
+const http_1 = require("http");
 dotenv_1.default.config();
 let conn_string;
 if (process.env.MONGO_CONN_STRING) {
@@ -63,7 +65,14 @@ app.use((error, req, res, next) => {
 mongoose_1.default
     .connect(process.env.MONGO_CONN_STRING)
     .then(() => {
-    app.listen(8080);
+    // const io = new Server(app);
+    // app.listen(8080);
+    const httpServer = (0, http_1.createServer)(app);
+    const io = new socket_io_1.Server(httpServer);
+    httpServer.listen(8080);
+    io.on("connection", (socket) => {
+        console.log("New client connected");
+    });
 })
     .catch((err) => {
     console.log(err);
