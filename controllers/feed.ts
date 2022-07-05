@@ -73,7 +73,7 @@ export const createPost = async (
     const user = await User.findById(req.userId);
     user?.posts.push(post);
     await user?.save();
-    const userSocket = getIO().emit("posts", {
+    getIO().emit("posts", {
       action: "create",
       post: {
         ...post.toObject(),

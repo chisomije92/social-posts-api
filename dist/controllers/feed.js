@@ -72,7 +72,7 @@ const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const user = yield user_1.default.findById(req.userId);
         user === null || user === void 0 ? void 0 : user.posts.push(post);
         yield (user === null || user === void 0 ? void 0 : user.save());
-        const userSocket = (0, socket_1.getIO)().emit("posts", {
+        (0, socket_1.getIO)().emit("posts", {
             action: "create",
             post: Object.assign(Object.assign({}, post.toObject()), { creator: {
                     _id: req.userId,

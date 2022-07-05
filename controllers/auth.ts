@@ -22,8 +22,7 @@ export const signup = (req: Request, res: Response, next: NextFunction) => {
       422,
       errors.array()
     );
-    // error.statusCode = 422;
-    // error.data = errors.array();
+
     throw error;
   }
   const { name, email, password } = req.body;
@@ -56,9 +55,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        const error = new Error("Could not find user.");
-        //@ts-ignore
-        error.statusCode = 404;
+        const error = new CustomError("Could not find user.", 404);
         throw error;
       }
       loadedUser = user;
@@ -66,9 +63,6 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       bcrypt.compare(password, user.password).then((isEqual) => {
         if (!isEqual) {
           const error = new CustomError("Wrong password!", 401);
-          //   const error = new Error("Wrong password!");
-          //   //@ts-ignore
-          //   error.statusCode = 401;
           throw error;
         }
         const token = jwt.sign(
@@ -89,9 +83,6 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
       });
     })
     .catch((err: CustomError) => {
-      //   if (!err.statusCode) {
-      //     err.statusCode = 500;
-      //   }
       next(err);
     });
 };

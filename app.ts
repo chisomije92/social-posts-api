@@ -9,7 +9,7 @@ import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { CustomError } from "./utils/custom-error";
-import { Server, Socket } from "socket.io";
+import { Socket } from "socket.io";
 import { createServer } from "http";
 import { init } from "./socket";
 
@@ -92,9 +92,6 @@ app.use(
 mongoose
   .connect(process.env.MONGO_CONN_STRING)
   .then(() => {
-    // const io = new Server(app);
-    // app.listen(8080);
-
     httpServer.listen(8080);
   })
   .catch((err) => {

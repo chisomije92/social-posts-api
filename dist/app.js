@@ -70,8 +70,6 @@ app.use((error, req, res, next) => {
 mongoose_1.default
     .connect(process.env.MONGO_CONN_STRING)
     .then(() => {
-    // const io = new Server(app);
-    // app.listen(8080);
     httpServer.listen(8080);
 })
     .catch((err) => {
