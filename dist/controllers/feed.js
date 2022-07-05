@@ -189,6 +189,10 @@ const deletePost = (req, res, next) => {
         return user.save();
     })
         .then((result) => {
+        (0, socket_1.getIO)().emit("posts", {
+            action: "delete",
+            post: postId,
+        });
         res.status(200).json({
             message: "Post deleted successfully",
         });

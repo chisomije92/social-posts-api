@@ -198,6 +198,10 @@ export const deletePost = (req: Request, res: Response, next: NextFunction) => {
       return user.save();
     })
     .then((result) => {
+      getIO().emit("posts", {
+        action: "delete",
+        post: postId,
+      });
       res.status(200).json({
         message: "Post deleted successfully",
       });
