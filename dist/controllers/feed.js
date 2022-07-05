@@ -124,13 +124,15 @@ const updatePost = (req, res, next) => {
         throw error;
     }
     post_1.default.findById(postId)
+        .populate("creator")
         .then((post) => {
         var _a;
         if (!post) {
             const error = new custom_error_1.CustomError("Could not find post.", 404);
             throw error;
         }
-        if (post.creator.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
+        const postObject = post.toObject();
+        if (postObject.creator._id.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
             const error = new custom_error_1.CustomError("Not authorized", 403);
             throw error;
         }
@@ -143,6 +145,10 @@ const updatePost = (req, res, next) => {
         return post.save();
     })
         .then((result) => {
+        (0, socket_1.getIO)().emit("posts", {
+            action: "update",
+            post: Object.assign({}, result.toObject()),
+        });
         res.status(200).json({
             message: "Post updated successfully",
             post: result,

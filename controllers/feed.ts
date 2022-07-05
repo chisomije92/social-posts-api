@@ -132,15 +132,18 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
     throw error;
   }
   Post.findById(postId)
+    .populate("creator")
     .then((post) => {
       if (!post) {
         const error = new CustomError("Could not find post.", 404);
         throw error;
       }
-      if (post.creator.toString() !== req.userId?.toString()) {
+      const postObject = post.toObject();
+      if (postObject.creator._id.toString() !== req.userId?.toString()) {
         const error = new CustomError("Not authorized", 403);
         throw error;
       }
+
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
       }
@@ -150,6 +153,12 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
       return post.save();
     })
     .then((result) => {
+      getIO().emit("posts", {
+        action: "update",
+        post: {
+          ...result.toObject(),
+        },
+      });
       res.status(200).json({
         message: "Post updated successfully",
         post: result,
