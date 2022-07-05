@@ -9,8 +9,9 @@ import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { CustomError } from "./utils/custom-error";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { createServer } from "http";
+import { init } from "./socket";
 
 dotenv.config();
 let conn_string: string;
@@ -22,8 +23,8 @@ if (process.env.MONGO_CONN_STRING) {
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: "*" } });
-io.on("connection", (socket) => {
+const io = init(httpServer);
+io.on("connection", (socket: Socket) => {
   console.log("New client connected");
 });
 
