@@ -24,6 +24,11 @@ else {
     throw new Error("MONGO_CONN_STRING is not set");
 }
 const app = (0, express_1.default)();
+const httpServer = (0, http_1.createServer)(app);
+const io = new socket_io_1.Server(httpServer, { cors: { origin: "*" } });
+io.on("connection", (socket) => {
+    console.log("New client connected");
+});
 const fileStorage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "images");
@@ -67,12 +72,7 @@ mongoose_1.default
     .then(() => {
     // const io = new Server(app);
     // app.listen(8080);
-    const httpServer = (0, http_1.createServer)(app);
-    const io = new socket_io_1.Server(httpServer);
     httpServer.listen(8080);
-    io.on("connection", (socket) => {
-        console.log("New client connected");
-    });
 })
     .catch((err) => {
     console.log(err);

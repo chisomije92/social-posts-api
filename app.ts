@@ -21,6 +21,11 @@ if (process.env.MONGO_CONN_STRING) {
 }
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: { origin: "*" } });
+io.on("connection", (socket) => {
+  console.log("New client connected");
+});
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -88,12 +93,8 @@ mongoose
   .then(() => {
     // const io = new Server(app);
     // app.listen(8080);
-    const httpServer = createServer(app);
-    const io = new Server(httpServer);
+
     httpServer.listen(8080);
-    io.on("connection", (socket) => {
-        console.log("New client connected");
-    }
   })
   .catch((err) => {
     console.log(err);
