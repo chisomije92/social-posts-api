@@ -3,7 +3,7 @@ import { PostType } from "./post";
 
 const { Schema, model } = mongoose;
 
-export interface UserType {
+export interface UserType extends mongoose.Document {
   _id?: Types.ObjectId;
   email: string;
   password: string;

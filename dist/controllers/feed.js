@@ -19,6 +19,7 @@ const user_1 = __importDefault(require("../models/user"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const custom_error_1 = require("../utils/custom-error");
+const socket_1 = require("../socket");
 const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     let queryPage;
     if (req.query && req.query.page) {
@@ -30,6 +31,7 @@ const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     try {
         const totalItems = yield post_1.default.find().countDocuments();
         const posts = yield post_1.default.find()
+            .populate("creator")
             .skip((currentPage - 1) * perPage)
             .limit(perPage);
         res.status(200).json({
@@ -43,7 +45,7 @@ const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getPosts = getPosts;
-const createPost = (req, res, next) => {
+const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422, errors.array());
@@ -58,37 +60,37 @@ const createPost = (req, res, next) => {
     }
     const { title, content } = req.body;
     const imageUrl = req.file.path.replace("\\", "/");
-    let creator;
-    const post = new post_1.default({
-        title: title,
-        content: content,
-        imageUrl: imageUrl,
-        creator: req.userId,
-    });
-    post
-        .save()
-        .then((result) => {
-        return user_1.default.findById(req.userId);
-    })
-        .then((user) => {
-        creator = user;
+    try {
+        const post = new post_1.default({
+            title: title,
+            content: content,
+            imageUrl: imageUrl,
+            creator: req.userId,
+        });
+        yield post.save();
+        const user = yield user_1.default.findById(req.userId);
         user === null || user === void 0 ? void 0 : user.posts.push(post);
-        return user === null || user === void 0 ? void 0 : user.save();
-    })
-        .then((result) => {
+        yield (user === null || user === void 0 ? void 0 : user.save());
+        const userSocket = (0, socket_1.getIO)().emit("posts", {
+            action: "create",
+            post: Object.assign(Object.assign({}, post.toObject()), { creator: {
+                    _id: req.userId,
+                    name: user === null || user === void 0 ? void 0 : user.name,
+                } }),
+        });
         res.status(201).json({
             message: "Post created successfully",
             post: post,
             creator: {
-                _id: creator === null || creator === void 0 ? void 0 : creator._id,
-                name: creator === null || creator === void 0 ? void 0 : creator.name,
+                _id: user === null || user === void 0 ? void 0 : user._id,
+                name: user === null || user === void 0 ? void 0 : user.name,
             },
         });
-    })
-        .catch((err) => {
+    }
+    catch (err) {
         next(err);
-    });
-};
+    }
+});
 exports.createPost = createPost;
 const getPost = (req, res, next) => {
     const postId = req.params.postId;

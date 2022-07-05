@@ -2,7 +2,7 @@ import mongoose, { Types } from "mongoose";
 
 const { Schema, model } = mongoose;
 
-export interface PostType {
+export interface PostType extends mongoose.Document {
   _id?: Types.ObjectId;
   imageUrl: string;
   title: string;

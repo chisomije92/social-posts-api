@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { Types } from "mongoose";
 import { CustomError } from "../utils/custom-error";
+import { getIO } from "../socket";
 
 export const getPosts = async (
   req: Request,
@@ -22,6 +23,7 @@ export const getPosts = async (
   try {
     const totalItems = await Post.find().countDocuments();
     const posts = await Post.find()
+      .populate("creator")
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
@@ -35,7 +37,11 @@ export const getPosts = async (
   }
 };
 
-export const createPost = (req: Request, res: Response, next: NextFunction) => {
+export const createPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new CustomError(
@@ -55,36 +61,39 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   }
   const { title, content } = req.body;
   const imageUrl = req.file.path.replace("\\", "/");
-  let creator: UserType | null;
-  const post = new Post({
-    title: title,
-    content: content,
-    imageUrl: imageUrl,
-    creator: req.userId,
-  });
-  post
-    .save()
-    .then((result) => {
-      return User.findById(req.userId);
-    })
-    .then((user) => {
-      creator = user;
-      user?.posts.push(post);
-      return user?.save();
-    })
-    .then((result) => {
-      res.status(201).json({
-        message: "Post created successfully",
-        post: post,
-        creator: {
-          _id: creator?._id,
-          name: creator?.name,
-        },
-      });
-    })
-    .catch((err: CustomError) => {
-      next(err);
+  try {
+    const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+      creator: req.userId,
     });
+    await post.save();
+    const user = await User.findById(req.userId);
+    user?.posts.push(post);
+    await user?.save();
+    const userSocket = getIO().emit("posts", {
+      action: "create",
+      post: {
+        ...post.toObject(),
+        creator: {
+          _id: req.userId,
+          name: user?.name,
+        },
+      },
+    });
+
+    res.status(201).json({
+      message: "Post created successfully",
+      post: post,
+      creator: {
+        _id: user?._id,
+        name: user?.name,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 export const getPost = (req: Request, res: Response, next: NextFunction) => {
