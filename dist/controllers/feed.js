@@ -32,6 +32,7 @@ const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         const totalItems = yield post_1.default.find().countDocuments();
         const posts = yield post_1.default.find()
             .populate("creator")
+            .sort({ createdAt: -1 })
             .skip((currentPage - 1) * perPage)
             .limit(perPage);
         res.status(200).json({
