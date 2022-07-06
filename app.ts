@@ -9,9 +9,9 @@ import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { CustomError } from "./utils/custom-error";
-import { Socket } from "socket.io";
-import { createServer } from "http";
-import { init } from "./socket";
+import { graphqlHTTP } from "express-graphql";
+import { schema } from "./graphql/schema";
+import resolvers from "./graphql/resolvers";
 
 dotenv.config();
 let conn_string: string;
@@ -22,11 +22,11 @@ if (process.env.MONGO_CONN_STRING) {
 }
 
 const app = express();
-const httpServer = createServer(app);
-const io = init(httpServer);
-io.on("connection", (socket: Socket) => {
-  console.log("New client connected");
-});
+// const httpServer = createServer(app);
+// const io = init(httpServer);
+// io.on("connection", (socket: Socket) => {
+//   console.log("New client connected");
+// });
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -74,9 +74,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/feed", feedRoutes);
-app.use("/auth", authRoutes);
-
+// app.use("/feed", feedRoutes);
+// app.use("/auth", authRoutes);
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    rootValue: resolvers,
+    graphiql: true,
+  })
+);
 app.use(
   (error: CustomError, req: Request, res: Response, next: NextFunction) => {
     console.log(error);
@@ -92,7 +99,7 @@ app.use(
 mongoose
   .connect(process.env.MONGO_CONN_STRING)
   .then(() => {
-    httpServer.listen(8080);
+    app.listen(8080);
   })
   .catch((err) => {
     console.log(err);

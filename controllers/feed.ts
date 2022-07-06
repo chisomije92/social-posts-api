@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { Types } from "mongoose";
 import { CustomError } from "../utils/custom-error";
-import { getIO } from "../socket";
+// import { getIO } from "../socket";
 
 export const getPosts = async (
   req: Request,
@@ -73,16 +73,16 @@ export const createPost = async (
     const user = await User.findById(req.userId);
     user?.posts.push(post);
     await user?.save();
-    getIO().emit("posts", {
-      action: "create",
-      post: {
-        ...post.toObject(),
-        creator: {
-          _id: req.userId,
-          name: user?.name,
-        },
-      },
-    });
+    // getIO().emit("posts", {
+    //   action: "create",
+    //   post: {
+    //     ...post.toObject(),
+    //     creator: {
+    //       _id: req.userId,
+    //       name: user?.name,
+    //     },
+    //   },
+    // });
 
     res.status(201).json({
       message: "Post created successfully",
@@ -154,12 +154,12 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
       return post.save();
     })
     .then((result) => {
-      getIO().emit("posts", {
-        action: "update",
-        post: {
-          ...result.toObject(),
-        },
-      });
+      //   getIO().emit("posts", {
+      //     action: "update",
+      //     post: {
+      //       ...result.toObject(),
+      //     },
+      //   });
       res.status(200).json({
         message: "Post updated successfully",
         post: result,
@@ -198,10 +198,10 @@ export const deletePost = (req: Request, res: Response, next: NextFunction) => {
       return user.save();
     })
     .then((result) => {
-      getIO().emit("posts", {
-        action: "delete",
-        post: postId,
-      });
+      //   getIO().emit("posts", {
+      //     action: "delete",
+      //     post: postId,
+      //   });
       res.status(200).json({
         message: "Post deleted successfully",
       });

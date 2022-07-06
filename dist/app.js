@@ -4,8 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const feed_1 = __importDefault(require("./routes/feed"));
-const auth_1 = __importDefault(require("./routes/auth"));
 // import bodyParser from "body-parser";
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -13,8 +11,9 @@ const multer_1 = __importDefault(require("multer"));
 const uuid_1 = require("uuid");
 const path_1 = __importDefault(require("path"));
 const custom_error_1 = require("./utils/custom-error");
-const http_1 = require("http");
-const socket_1 = require("./socket");
+const express_graphql_1 = require("express-graphql");
+const schema_1 = require("./graphql/schema");
+const resolvers_1 = __importDefault(require("./graphql/resolvers"));
 dotenv_1.default.config();
 let conn_string;
 if (process.env.MONGO_CONN_STRING) {
@@ -24,11 +23,11 @@ else {
     throw new Error("MONGO_CONN_STRING is not set");
 }
 const app = (0, express_1.default)();
-const httpServer = (0, http_1.createServer)(app);
-const io = (0, socket_1.init)(httpServer);
-io.on("connection", (socket) => {
-    console.log("New client connected");
-});
+// const httpServer = createServer(app);
+// const io = init(httpServer);
+// io.on("connection", (socket: Socket) => {
+//   console.log("New client connected");
+// });
 const fileStorage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "images");
@@ -60,8 +59,13 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     next();
 });
-app.use("/feed", feed_1.default);
-app.use("/auth", auth_1.default);
+// app.use("/feed", feedRoutes);
+// app.use("/auth", authRoutes);
+app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
+    schema: schema_1.schema,
+    rootValue: resolvers_1.default,
+    graphiql: true,
+}));
 app.use((error, req, res, next) => {
     console.log(error);
     const err = new custom_error_1.CustomError(error.message, error.statusCode || 500, error.data);
@@ -70,7 +74,7 @@ app.use((error, req, res, next) => {
 mongoose_1.default
     .connect(process.env.MONGO_CONN_STRING)
     .then(() => {
-    httpServer.listen(8080);
+    app.listen(8080);
 })
     .catch((err) => {
     console.log(err);

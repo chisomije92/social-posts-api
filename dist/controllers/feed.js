@@ -19,7 +19,7 @@ const user_1 = __importDefault(require("../models/user"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const custom_error_1 = require("../utils/custom-error");
-const socket_1 = require("../socket");
+// import { getIO } from "../socket";
 const getPosts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     let queryPage;
     if (req.query && req.query.page) {
@@ -72,13 +72,16 @@ const createPost = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const user = yield user_1.default.findById(req.userId);
         user === null || user === void 0 ? void 0 : user.posts.push(post);
         yield (user === null || user === void 0 ? void 0 : user.save());
-        (0, socket_1.getIO)().emit("posts", {
-            action: "create",
-            post: Object.assign(Object.assign({}, post.toObject()), { creator: {
-                    _id: req.userId,
-                    name: user === null || user === void 0 ? void 0 : user.name,
-                } }),
-        });
+        // getIO().emit("posts", {
+        //   action: "create",
+        //   post: {
+        //     ...post.toObject(),
+        //     creator: {
+        //       _id: req.userId,
+        //       name: user?.name,
+        //     },
+        //   },
+        // });
         res.status(201).json({
             message: "Post created successfully",
             post: post,
@@ -146,10 +149,12 @@ const updatePost = (req, res, next) => {
         return post.save();
     })
         .then((result) => {
-        (0, socket_1.getIO)().emit("posts", {
-            action: "update",
-            post: Object.assign({}, result.toObject()),
-        });
+        //   getIO().emit("posts", {
+        //     action: "update",
+        //     post: {
+        //       ...result.toObject(),
+        //     },
+        //   });
         res.status(200).json({
             message: "Post updated successfully",
             post: result,
@@ -189,10 +194,10 @@ const deletePost = (req, res, next) => {
         return user.save();
     })
         .then((result) => {
-        (0, socket_1.getIO)().emit("posts", {
-            action: "delete",
-            post: postId,
-        });
+        //   getIO().emit("posts", {
+        //     action: "delete",
+        //     post: postId,
+        //   });
         res.status(200).json({
             message: "Post deleted successfully",
         });
