@@ -26,7 +26,6 @@ exports.default = (req, res, next) => {
     }
     catch (err) {
         req.isAuth = false;
-        console.log(req.isAuth, req.userId, "2");
         return next();
     }
     if (!decodedToken) {

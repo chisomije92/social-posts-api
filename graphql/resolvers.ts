@@ -1,3 +1,4 @@
+import { Request } from "express";
 import User from "../models/user";
 import Post from "../models/post";
 import bcrypt from "bcryptjs";
@@ -129,14 +130,22 @@ const resolvers: any = {
     };
   },
 
-  posts: async (args: any, req: any) => {
+  posts: async ({ page }: any, req: Request) => {
     if (!req.isAuth) {
+      console.log("Not authenticated");
       throw new CustomGraphQlError("Not authenticated", 401);
     }
+
+    if (!page) {
+      page = 1;
+    }
+    const perPage = 2;
     const totalPosts = await Post.find().countDocuments();
-    const posts = await Post.find().populate("creator").sort({ createdAt: -1 });
-    // .skip(skip)
-    // .limit(first);
+    const posts = await Post.find()
+      .populate("creator")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage);
     return {
       posts: posts.map((post: any) => {
         return {

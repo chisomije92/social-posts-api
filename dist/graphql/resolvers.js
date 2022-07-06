@@ -107,14 +107,21 @@ const resolvers = {
         yield user.save();
         return Object.assign(Object.assign({}, createdPost.toObject()), { _id: createdPost._id.toString(), createdAt: createdPost.createdAt, updatedAt: createdPost.updatedAt });
     }),
-    posts: (args, req) => __awaiter(void 0, void 0, void 0, function* () {
+    posts: ({ page }, req) => __awaiter(void 0, void 0, void 0, function* () {
         if (!req.isAuth) {
+            console.log("Not authenticated");
             throw new graphql_custom_1.CustomGraphQlError("Not authenticated", 401);
         }
+        if (!page) {
+            page = 1;
+        }
+        const perPage = 2;
         const totalPosts = yield post_1.default.find().countDocuments();
-        const posts = yield post_1.default.find().populate("creator").sort({ createdAt: -1 });
-        // .skip(skip)
-        // .limit(first);
+        const posts = yield post_1.default.find()
+            .populate("creator")
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * perPage)
+            .limit(perPage);
         return {
             posts: posts.map((post) => {
                 return Object.assign(Object.assign({}, post.toObject()), { _id: post._id.toString(), createdAt: post.createdAt, updatedAt: post.updatedAt });

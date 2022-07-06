@@ -24,11 +24,6 @@ if (process.env.MONGO_CONN_STRING) {
 }
 
 const app = express();
-// const httpServer = createServer(app);
-// const io = init(httpServer);
-// io.on("connection", (socket: Socket) => {
-//   console.log("New client connected");
-// });
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -89,22 +84,7 @@ app.use(
     schema: schema,
     rootValue: resolvers,
     graphiql: true,
-    // formatError: (err: GraphQLError) => {
-    //   if (err.originalError) {
-    //     return {
-    //       message: err.originalError.message || err.message,
-    //       // @ts-ignore
-    //       status: err.originalError.status || 500,
-    //     };
-    //   }
-    // },
     customFormatErrorFn: (err: GraphQLError) => {
-      //   return {
-      //     path: err.path,
-      //     message: err.message,
-      //     locations: err.locations,
-      //     originalError: err.originalError,
-      //   };
       if (!err.originalError) {
         console.log(err);
         return err;
@@ -114,7 +94,7 @@ app.use(
       const status = 500;
       const locations = err.locations;
       const path = err.path;
-      //   return new CustomError(message, status);
+
       return {
         message,
         status,

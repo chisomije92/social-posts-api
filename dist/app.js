@@ -24,11 +24,6 @@ else {
     throw new Error("MONGO_CONN_STRING is not set");
 }
 const app = (0, express_1.default)();
-// const httpServer = createServer(app);
-// const io = init(httpServer);
-// io.on("connection", (socket: Socket) => {
-//   console.log("New client connected");
-// });
 const fileStorage = multer_1.default.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "images");
@@ -70,22 +65,7 @@ app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
     schema: schema_1.schema,
     rootValue: resolvers_1.default,
     graphiql: true,
-    // formatError: (err: GraphQLError) => {
-    //   if (err.originalError) {
-    //     return {
-    //       message: err.originalError.message || err.message,
-    //       // @ts-ignore
-    //       status: err.originalError.status || 500,
-    //     };
-    //   }
-    // },
     customFormatErrorFn: (err) => {
-        //   return {
-        //     path: err.path,
-        //     message: err.message,
-        //     locations: err.locations,
-        //     originalError: err.originalError,
-        //   };
         if (!err.originalError) {
             console.log(err);
             return err;
@@ -95,7 +75,6 @@ app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
         const status = 500;
         const locations = err.locations;
         const path = err.path;
-        //   return new CustomError(message, status);
         return {
             message,
             status,

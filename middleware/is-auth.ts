@@ -20,18 +20,18 @@ export default (req: Request, res: Response, next: NextFunction) => {
   }
 
   const token: string = authHeader.split(" ")[1];
+
   let decodedToken: any;
   try {
     decodedToken = jwt.verify(token, secret);
   } catch (err) {
     req.isAuth = false;
-    console.log(req.isAuth, req.userId, "2");
+
     return next();
   }
 
   if (!decodedToken) {
     req.isAuth = false;
-
     return next();
   }
   req.userId = decodedToken.userId;
