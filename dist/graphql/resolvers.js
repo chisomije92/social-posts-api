@@ -28,7 +28,7 @@ const resolvers = {
             errors.push({ message: "Password is too short" });
         }
         if (errors.length > 0) {
-            const error = new graphql_custom_1.graphQlErr("Validation failed, entered data is incorrect", 500, errors);
+            const error = new graphql_custom_1.CustomGraphQlError("Validation failed, entered data is incorrect", 500, errors);
             throw error;
         }
         const existingUser = yield user_1.default.findOne({ email: email });

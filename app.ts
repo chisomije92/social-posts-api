@@ -13,7 +13,6 @@ import { graphqlHTTP } from "express-graphql";
 import { schema } from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
-import { graphQlErr } from "./utils/graphql-custom";
 
 dotenv.config();
 let conn_string: string;
@@ -105,10 +104,11 @@ app.use(
         return err;
       }
       console.log(err.originalError);
-      const message = err.originalError.message;
+      const message = err.message;
       const status = 500;
       const locations = err.locations;
       const path = err.path;
+      //   return new CustomError(message, status);
       return {
         message,
         status,

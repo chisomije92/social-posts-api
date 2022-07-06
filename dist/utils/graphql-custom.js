@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.graphQlErr = void 0;
-class graphQlErr {
-    constructor(message, status = 500, data) {
-        this.status = status;
+exports.CustomGraphQlError = void 0;
+class CustomGraphQlError {
+    constructor(message, code = 500, data) {
+        this.code = code;
         this.message = message;
         this.data = data;
     }
 }
-exports.graphQlErr = graphQlErr;
+exports.CustomGraphQlError = CustomGraphQlError;
 //# sourceMappingURL=graphql-custom.js.map

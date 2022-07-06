@@ -86,10 +86,11 @@ app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
             return err;
         }
         console.log(err.originalError);
-        const message = err.originalError.message;
+        const message = err.message;
         const status = 500;
         const locations = err.locations;
         const path = err.path;
+        //   return new CustomError(message, status);
         return {
             message,
             status,
