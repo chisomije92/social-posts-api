@@ -12,6 +12,8 @@ import { CustomError } from "./utils/custom-error";
 import { graphqlHTTP } from "express-graphql";
 import { schema } from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
+import { GraphQLError, GraphQLFormattedError } from "graphql";
+import { graphQlErr } from "./utils/graphql-custom";
 
 dotenv.config();
 let conn_string: string;
@@ -82,6 +84,38 @@ app.use(
     schema: schema,
     rootValue: resolvers,
     graphiql: true,
+    // formatError: (err: GraphQLError) => {
+    //   if (err.originalError) {
+    //     return {
+    //       message: err.originalError.message || err.message,
+    //       // @ts-ignore
+    //       status: err.originalError.status || 500,
+    //     };
+    //   }
+    // },
+    customFormatErrorFn: (err: GraphQLError) => {
+      //   return {
+      //     path: err.path,
+      //     message: err.message,
+      //     locations: err.locations,
+      //     originalError: err.originalError,
+      //   };
+      if (!err.originalError) {
+        console.log(err);
+        return err;
+      }
+      console.log(err.originalError);
+      const message = err.originalError.message;
+      const status = 500;
+      const locations = err.locations;
+      const path = err.path;
+      return {
+        message,
+        status,
+        locations,
+        path,
+      };
+    },
   })
 );
 app.use(

@@ -65,6 +65,38 @@ app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
     schema: schema_1.schema,
     rootValue: resolvers_1.default,
     graphiql: true,
+    // formatError: (err: GraphQLError) => {
+    //   if (err.originalError) {
+    //     return {
+    //       message: err.originalError.message || err.message,
+    //       // @ts-ignore
+    //       status: err.originalError.status || 500,
+    //     };
+    //   }
+    // },
+    customFormatErrorFn: (err) => {
+        //   return {
+        //     path: err.path,
+        //     message: err.message,
+        //     locations: err.locations,
+        //     originalError: err.originalError,
+        //   };
+        if (!err.originalError) {
+            console.log(err);
+            return err;
+        }
+        console.log(err.originalError);
+        const message = err.originalError.message;
+        const status = 500;
+        const locations = err.locations;
+        const path = err.path;
+        return {
+            message,
+            status,
+            locations,
+            path,
+        };
+    },
 }));
 app.use((error, req, res, next) => {
     console.log(error);

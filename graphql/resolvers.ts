@@ -2,6 +2,8 @@ import User from "../models/user";
 import bcrypt from "bcryptjs";
 import validator from "validator";
 import { CustomError } from "../utils/custom-error";
+import { graphQlErr } from "../utils/graphql-custom";
+import { GraphQLError } from "graphql";
 
 const resolvers: any = {
   createUser: async ({ userInput }: any, req: any) => {
@@ -19,9 +21,9 @@ const resolvers: any = {
     }
 
     if (errors.length > 0) {
-      const error = new CustomError(
+      const error = new graphQlErr(
         "Validation failed, entered data is incorrect",
-        422,
+        500,
         errors
       );
       throw error;

@@ -6,11 +6,11 @@ type MessageError = {
 export class CustomError extends Error {
   statusCode: number;
   message: string;
-  data?: ValidationError[] | MessageError[];
+  data?: ValidationError[];
   constructor(
     message: string,
     statusCode: number = 500,
-    data?: ValidationError[] | MessageError[]
+    data?: ValidationError[]
   ) {
     super();
     this.statusCode = statusCode;

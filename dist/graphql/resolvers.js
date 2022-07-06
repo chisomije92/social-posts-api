@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const user_1 = __importDefault(require("../models/user"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const validator_1 = __importDefault(require("validator"));
-const custom_error_1 = require("../utils/custom-error");
+const graphql_custom_1 = require("../utils/graphql-custom");
 const resolvers = {
     createUser: ({ userInput }, req) => __awaiter(void 0, void 0, void 0, function* () {
         const { name, email, password } = userInput;
@@ -28,7 +28,7 @@ const resolvers = {
             errors.push({ message: "Password is too short" });
         }
         if (errors.length > 0) {
-            const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422, errors);
+            const error = new graphql_custom_1.graphQlErr("Validation failed, entered data is incorrect", 500, errors);
             throw error;
         }
         const existingUser = yield user_1.default.findOne({ email: email });
