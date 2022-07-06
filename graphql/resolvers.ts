@@ -1,17 +1,41 @@
 import User from "../models/user";
 import bcrypt from "bcryptjs";
+import validator from "validator";
+import { CustomError } from "../utils/custom-error";
 
 const resolvers: any = {
   createUser: async ({ userInput }: any, req: any) => {
-    const existingUser = await User.findOne({ email: userInput.email });
+    const { name, email, password } = userInput;
+    const errors = [];
+    if (!validator.isEmail(email)) {
+      errors.push({ message: "Email is invalid" });
+    }
+
+    if (
+      validator.isEmpty(password) ||
+      !validator.isLength(password, { min: 5 })
+    ) {
+      errors.push({ message: "Password is too short" });
+    }
+
+    if (errors.length > 0) {
+      const error = new CustomError(
+        "Validation failed, entered data is incorrect",
+        422,
+        errors
+      );
+      throw error;
+    }
+
+    const existingUser = await User.findOne({ email: email });
     if (existingUser) {
       throw new Error("User already exists");
     }
-    const hashedPassword = await bcrypt.hash(userInput.password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
-      email: userInput.email,
+      email: email,
       password: hashedPassword,
-      name: userInput.name,
+      name: name,
     });
     const createdUser = await user.save();
     console.log(createdUser.toObject());

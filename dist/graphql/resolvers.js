@@ -14,17 +14,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const user_1 = __importDefault(require("../models/user"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const validator_1 = __importDefault(require("validator"));
+const custom_error_1 = require("../utils/custom-error");
 const resolvers = {
     createUser: ({ userInput }, req) => __awaiter(void 0, void 0, void 0, function* () {
-        const existingUser = yield user_1.default.findOne({ email: userInput.email });
+        const { name, email, password } = userInput;
+        const errors = [];
+        if (!validator_1.default.isEmail(email)) {
+            errors.push({ message: "Email is invalid" });
+        }
+        if (validator_1.default.isEmpty(password) ||
+            !validator_1.default.isLength(password, { min: 5 })) {
+            errors.push({ message: "Password is too short" });
+        }
+        if (errors.length > 0) {
+            const error = new custom_error_1.CustomError("Validation failed, entered data is incorrect", 422, errors);
+            throw error;
+        }
+        const existingUser = yield user_1.default.findOne({ email: email });
         if (existingUser) {
             throw new Error("User already exists");
         }
-        const hashedPassword = yield bcryptjs_1.default.hash(userInput.password, 12);
+        const hashedPassword = yield bcryptjs_1.default.hash(password, 12);
         const user = new user_1.default({
-            email: userInput.email,
+            email: email,
             password: hashedPassword,
-            name: userInput.name,
+            name: name,
         });
         const createdUser = yield user.save();
         console.log(createdUser.toObject());

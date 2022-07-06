@@ -1,13 +1,16 @@
 import { ValidationError } from "express-validator";
 
+type MessageError = {
+  message: string;
+};
 export class CustomError extends Error {
   statusCode: number;
   message: string;
-  data?: ValidationError[];
+  data?: ValidationError[] | MessageError[];
   constructor(
     message: string,
     statusCode: number = 500,
-    data?: ValidationError[]
+    data?: ValidationError[] | MessageError[]
   ) {
     super();
     this.statusCode = statusCode;
