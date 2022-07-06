@@ -1,4 +1,5 @@
 import User from "../models/user";
+import Post from "../models/post";
 import bcrypt from "bcryptjs";
 import validator from "validator";
 import { CustomGraphQlError } from "../utils/graphql-custom";
@@ -49,7 +50,7 @@ const resolvers: any = {
       name: name,
     });
     const createdUser = await user.save();
-    console.log(createdUser.toObject());
+
     return {
       ...createdUser.toObject(),
       password: null,
@@ -77,6 +78,42 @@ const resolvers: any = {
     return {
       token: token,
       userId: user._id.toString(),
+    };
+  },
+
+  createPost: async ({ postInput }: any, req: any) => {
+    const { title, content, imageUrl } = postInput;
+    const errors = [];
+    if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
+      errors.push({ message: "Title is required" });
+    }
+    if (validator.isEmpty(content)) {
+      errors.push({ message: "Content is required" });
+    }
+    // if (!validator.isURL(imageUrl)) {
+    //   errors.push({ message: "Image url is invalid" });
+    // }
+
+    if (errors.length > 0) {
+      const error = new CustomGraphQlError(
+        "Validation failed, entered data is incorrect",
+        500,
+        errors
+      );
+      throw error;
+    }
+
+    const post = new Post({
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+    });
+    const createdPost = await post.save();
+    return {
+      ...createdPost.toObject(),
+      _id: createdPost._id.toString(),
+      createdAt: createdPost.createdAt,
+      updatedAt: createdPost.updatedAt,
     };
   },
 };

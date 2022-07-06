@@ -31,10 +31,21 @@ export const schema = buildSchema(`
         userId: ID!
         token: String!
    }
+
+    input PostInputData {
+        title: String!
+        content: String!
+        imageUrl: String!
+
+    }
    
     type RootQuery {
         login(email: String!, password: String!): AuthData!
+        createPost(postInput: PostInputData): Post!
+
     }
+
+
 
     schema {
        query: RootQuery

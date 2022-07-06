@@ -33,10 +33,21 @@ exports.schema = (0, graphql_1.buildSchema)(`
         userId: ID!
         token: String!
    }
+
+    input PostInputData {
+        title: String!
+        content: String!
+        imageUrl: String!
+
+    }
    
     type RootQuery {
         login(email: String!, password: String!): AuthData!
+        createPost(postInput: PostInputData): Post!
+
     }
+
+
 
     schema {
        query: RootQuery

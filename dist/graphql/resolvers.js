@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const user_1 = __importDefault(require("../models/user"));
+const post_1 = __importDefault(require("../models/post"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const validator_1 = __importDefault(require("validator"));
 const graphql_custom_1 = require("../utils/graphql-custom");
@@ -52,7 +53,6 @@ const resolvers = {
             name: name,
         });
         const createdUser = yield user.save();
-        console.log(createdUser.toObject());
         return Object.assign(Object.assign({}, createdUser.toObject()), { password: null, _id: createdUser._id.toString() });
     }),
     login: ({ email, password }, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -72,6 +72,30 @@ const resolvers = {
             token: token,
             userId: user._id.toString(),
         };
+    }),
+    createPost: ({ postInput }, req) => __awaiter(void 0, void 0, void 0, function* () {
+        const { title, content, imageUrl } = postInput;
+        const errors = [];
+        if (validator_1.default.isEmpty(title) || !validator_1.default.isLength(title, { min: 5 })) {
+            errors.push({ message: "Title is required" });
+        }
+        if (validator_1.default.isEmpty(content)) {
+            errors.push({ message: "Content is required" });
+        }
+        // if (!validator.isURL(imageUrl)) {
+        //   errors.push({ message: "Image url is invalid" });
+        // }
+        if (errors.length > 0) {
+            const error = new graphql_custom_1.CustomGraphQlError("Validation failed, entered data is incorrect", 500, errors);
+            throw error;
+        }
+        const post = new post_1.default({
+            title: title,
+            content: content,
+            imageUrl: imageUrl,
+        });
+        const createdPost = yield post.save();
+        return Object.assign(Object.assign({}, createdPost.toObject()), { _id: createdPost._id.toString(), createdAt: createdPost.createdAt, updatedAt: createdPost.updatedAt });
     }),
 };
 exports.default = resolvers;
