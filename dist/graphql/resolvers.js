@@ -16,6 +16,16 @@ const user_1 = __importDefault(require("../models/user"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const validator_1 = __importDefault(require("validator"));
 const graphql_custom_1 = require("../utils/graphql-custom");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+let secret;
+if (process.env.JWT_SECRET) {
+    secret = process.env.JWT_SECRET;
+}
+else {
+    throw new Error("JWT_SECRET is not set");
+}
 const resolvers = {
     createUser: ({ userInput }, req) => __awaiter(void 0, void 0, void 0, function* () {
         const { name, email, password } = userInput;
@@ -44,6 +54,24 @@ const resolvers = {
         const createdUser = yield user.save();
         console.log(createdUser.toObject());
         return Object.assign(Object.assign({}, createdUser.toObject()), { password: null, _id: createdUser._id.toString() });
+    }),
+    login: ({ email, password }, req) => __awaiter(void 0, void 0, void 0, function* () {
+        const user = yield user_1.default.findOne({ email: email });
+        if (!user) {
+            throw new graphql_custom_1.CustomGraphQlError("User does not exist", 404);
+        }
+        const isEqual = yield bcryptjs_1.default.compare(password, user.password);
+        if (!isEqual) {
+            throw new Error("Password is incorrect");
+        }
+        const token = jsonwebtoken_1.default.sign({
+            userId: user._id.toString(),
+            email: user.email,
+        }, secret, { expiresIn: "1h" });
+        return {
+            token: token,
+            userId: user._id.toString(),
+        };
     }),
 };
 exports.default = resolvers;

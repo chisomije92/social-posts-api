@@ -2,6 +2,17 @@ import User from "../models/user";
 import bcrypt from "bcryptjs";
 import validator from "validator";
 import { CustomGraphQlError } from "../utils/graphql-custom";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+let secret: any;
+
+if (process.env.JWT_SECRET) {
+  secret = process.env.JWT_SECRET;
+} else {
+  throw new Error("JWT_SECRET is not set");
+}
 
 const resolvers: any = {
   createUser: async ({ userInput }: any, req: any) => {
@@ -43,6 +54,29 @@ const resolvers: any = {
       ...createdUser.toObject(),
       password: null,
       _id: createdUser._id.toString(),
+    };
+  },
+
+  login: async ({ email, password }: any, req: any) => {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new CustomGraphQlError("User does not exist", 404);
+    }
+    const isEqual = await bcrypt.compare(password, user.password);
+    if (!isEqual) {
+      throw new Error("Password is incorrect");
+    }
+    const token = jwt.sign(
+      {
+        userId: user._id.toString(),
+        email: user.email,
+      },
+      secret,
+      { expiresIn: "1h" }
+    );
+    return {
+      token: token,
+      userId: user._id.toString(),
     };
   },
 };
