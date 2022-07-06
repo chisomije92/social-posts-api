@@ -16,10 +16,8 @@ else {
 exports.default = (req, res, next) => {
     const authHeader = req.get("Authorization");
     if (!authHeader) {
-        const error = new Error("Not authenticated.");
-        //@ts-ignore
-        error.statusCode = 401;
-        throw error;
+        req.isAuth = false;
+        return next();
     }
     const token = authHeader.split(" ")[1];
     let decodedToken;
@@ -27,15 +25,16 @@ exports.default = (req, res, next) => {
         decodedToken = jsonwebtoken_1.default.verify(token, secret);
     }
     catch (err) {
-        //@ts-ignore
-        err.statusCode = 500;
-        throw err;
+        req.isAuth = false;
+        console.log(req.isAuth, req.userId, "2");
+        return next();
     }
     if (!decodedToken) {
-        const error = new Error("Not authenticated");
-        throw error;
+        req.isAuth = false;
+        return next();
     }
-    req.userId = decodedToken.id;
+    req.userId = decodedToken.userId;
+    req.isAuth = true;
     next();
 };
 //# sourceMappingURL=is-auth.js.map

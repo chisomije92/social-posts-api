@@ -5,6 +5,7 @@ declare global {
     interface Request {
       user?: Record<string, any> | null;
       userId?: Record<string, any> | null;
+      isAuth?: boolean;
     }
   }
 }

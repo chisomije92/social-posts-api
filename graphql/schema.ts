@@ -23,11 +23,9 @@ export const schema = buildSchema(`
         name: String!
         password: String!
     }
-   type RootMutation {
-        createUser(userInput: UserInputData): User
-   } 
-   
-   type AuthData {
+
+
+     type AuthData {
         userId: ID!
         token: String!
    }
@@ -38,14 +36,17 @@ export const schema = buildSchema(`
         imageUrl: String!
 
     }
+
+   type RootMutation {
+        createUser(userInput: UserInputData): User
+          createPost(postInput: PostInputData): Post!
+   } 
    
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        createPost(postInput: PostInputData): Post!
+      
 
     }
-
-
 
     schema {
        query: RootQuery

@@ -14,10 +14,9 @@ if (process.env.JWT_SECRET) {
 export default (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.get("Authorization");
   if (!authHeader) {
-    const error = new Error("Not authenticated.");
-    //@ts-ignore
-    error.statusCode = 401;
-    throw error;
+    req.isAuth = false;
+
+    return next();
   }
 
   const token: string = authHeader.split(" ")[1];
@@ -25,15 +24,18 @@ export default (req: Request, res: Response, next: NextFunction) => {
   try {
     decodedToken = jwt.verify(token, secret);
   } catch (err) {
-    //@ts-ignore
-    err.statusCode = 500;
-    throw err;
+    req.isAuth = false;
+    console.log(req.isAuth, req.userId, "2");
+    return next();
   }
 
   if (!decodedToken) {
-    const error = new Error("Not authenticated");
-    throw error;
+    req.isAuth = false;
+
+    return next();
   }
-  req.userId = decodedToken.id;
+  req.userId = decodedToken.userId;
+  req.isAuth = true;
+
   next();
 };

@@ -13,6 +13,7 @@ import { graphqlHTTP } from "express-graphql";
 import { schema } from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
+import isAuth from "./middleware/is-auth";
 
 dotenv.config();
 let conn_string: string;
@@ -77,6 +78,8 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+app.use(isAuth);
 
 // app.use("/feed", feedRoutes);
 // app.use("/auth", authRoutes);

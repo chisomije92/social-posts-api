@@ -53,13 +53,13 @@ const resolvers: any = {
 
     return {
       ...createdUser.toObject(),
-      password: null,
       _id: createdUser._id.toString(),
     };
   },
 
   login: async ({ email, password }: any, req: any) => {
     const user = await User.findOne({ email: email });
+
     if (!user) {
       throw new CustomGraphQlError("User does not exist", 404);
     }
@@ -75,6 +75,7 @@ const resolvers: any = {
       secret,
       { expiresIn: "1h" }
     );
+
     return {
       token: token,
       userId: user._id.toString(),
@@ -82,6 +83,9 @@ const resolvers: any = {
   },
 
   createPost: async ({ postInput }: any, req: any) => {
+    if (!req.isAuth) {
+      throw new CustomGraphQlError("Not authenticated", 401);
+    }
     const { title, content, imageUrl } = postInput;
     const errors = [];
     if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
@@ -103,12 +107,20 @@ const resolvers: any = {
       throw error;
     }
 
+    const user = await User.findById(req.userId);
+    if (!user) {
+      throw new CustomGraphQlError("User does not exist", 404);
+    }
+
     const post = new Post({
       title: title,
       content: content,
       imageUrl: imageUrl,
+      creator: user,
     });
     const createdPost = await post.save();
+    user.posts.push(createdPost);
+    await user.save();
     return {
       ...createdPost.toObject(),
       _id: createdPost._id.toString(),

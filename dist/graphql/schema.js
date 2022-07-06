@@ -25,11 +25,9 @@ exports.schema = (0, graphql_1.buildSchema)(`
         name: String!
         password: String!
     }
-   type RootMutation {
-        createUser(userInput: UserInputData): User
-   } 
-   
-   type AuthData {
+
+
+     type AuthData {
         userId: ID!
         token: String!
    }
@@ -40,14 +38,17 @@ exports.schema = (0, graphql_1.buildSchema)(`
         imageUrl: String!
 
     }
+
+   type RootMutation {
+        createUser(userInput: UserInputData): User
+          createPost(postInput: PostInputData): Post!
+   } 
    
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        createPost(postInput: PostInputData): Post!
+      
 
     }
-
-
 
     schema {
        query: RootQuery

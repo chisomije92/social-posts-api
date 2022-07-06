@@ -14,6 +14,7 @@ const custom_error_1 = require("./utils/custom-error");
 const express_graphql_1 = require("express-graphql");
 const schema_1 = require("./graphql/schema");
 const resolvers_1 = __importDefault(require("./graphql/resolvers"));
+const is_auth_1 = __importDefault(require("./middleware/is-auth"));
 dotenv_1.default.config();
 let conn_string;
 if (process.env.MONGO_CONN_STRING) {
@@ -62,6 +63,7 @@ app.use((req, res, next) => {
     }
     next();
 });
+app.use(is_auth_1.default);
 // app.use("/feed", feedRoutes);
 // app.use("/auth", authRoutes);
 app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({

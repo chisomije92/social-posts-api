@@ -53,7 +53,7 @@ const resolvers = {
             name: name,
         });
         const createdUser = yield user.save();
-        return Object.assign(Object.assign({}, createdUser.toObject()), { password: null, _id: createdUser._id.toString() });
+        return Object.assign(Object.assign({}, createdUser.toObject()), { _id: createdUser._id.toString() });
     }),
     login: ({ email, password }, req) => __awaiter(void 0, void 0, void 0, function* () {
         const user = yield user_1.default.findOne({ email: email });
@@ -74,6 +74,9 @@ const resolvers = {
         };
     }),
     createPost: ({ postInput }, req) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!req.isAuth) {
+            throw new graphql_custom_1.CustomGraphQlError("Not authenticated", 401);
+        }
         const { title, content, imageUrl } = postInput;
         const errors = [];
         if (validator_1.default.isEmpty(title) || !validator_1.default.isLength(title, { min: 5 })) {
@@ -89,12 +92,19 @@ const resolvers = {
             const error = new graphql_custom_1.CustomGraphQlError("Validation failed, entered data is incorrect", 500, errors);
             throw error;
         }
+        const user = yield user_1.default.findById(req.userId);
+        if (!user) {
+            throw new graphql_custom_1.CustomGraphQlError("User does not exist", 404);
+        }
         const post = new post_1.default({
             title: title,
             content: content,
             imageUrl: imageUrl,
+            creator: user,
         });
         const createdPost = yield post.save();
+        user.posts.push(createdPost);
+        yield user.save();
         return Object.assign(Object.assign({}, createdPost.toObject()), { _id: createdPost._id.toString(), createdAt: createdPost.createdAt, updatedAt: createdPost.updatedAt });
     }),
 };
