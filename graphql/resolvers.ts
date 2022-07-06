@@ -128,6 +128,27 @@ const resolvers: any = {
       updatedAt: createdPost.updatedAt,
     };
   },
+
+  posts: async (args: any, req: any) => {
+    if (!req.isAuth) {
+      throw new CustomGraphQlError("Not authenticated", 401);
+    }
+    const totalPosts = await Post.find().countDocuments();
+    const posts = await Post.find().populate("creator").sort({ createdAt: -1 });
+    // .skip(skip)
+    // .limit(first);
+    return {
+      posts: posts.map((post: any) => {
+        return {
+          ...post.toObject(),
+          _id: post._id.toString(),
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+        };
+      }),
+      totalPosts: totalPosts,
+    };
+  },
 };
 
 export default resolvers;
