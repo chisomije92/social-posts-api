@@ -47,12 +47,14 @@ exports.schema = (0, graphql_1.buildSchema)(`
    type RootMutation {
         createUser(userInput: UserInputData): User!
         createPost(postInput: PostInputData): Post!
+        updatePost(postId: ID!, postInput: PostInputData!): Post!
    } 
    
     type RootQuery {
         login(email: String!, password: String!): AuthData!
         posts(page: Int): PostsData!
         post(postId: ID!): Post
+        
     }
 
     schema {

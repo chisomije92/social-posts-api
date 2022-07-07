@@ -171,6 +171,51 @@ const resolvers: any = {
       updatedAt: post.updatedAt.toISOString(),
     };
   },
+  updatePost: async ({ postId, postInput }: any, req: Request) => {
+    if (!req.isAuth) {
+      throw new CustomGraphQlError("Not authenticated", 401);
+    }
+    const post = await Post.findById(postId).populate("creator");
+    if (!post) {
+      throw new CustomGraphQlError("Post does not exist", 404);
+    }
+    //
+    if (post.creator._id.toString() !== req.userId?.toString()) {
+      throw new CustomGraphQlError("Not authorized", 403);
+    }
+    const { title, content, imageUrl } = postInput;
+
+    const errors = [];
+    if (validator.isEmpty(title) || !validator.isLength(title, { min: 5 })) {
+      errors.push({ message: "Title is required" });
+    }
+    if (validator.isEmpty(content)) {
+      errors.push({ message: "Content is required" });
+    }
+
+    if (errors.length > 0) {
+      const error = new CustomGraphQlError(
+        "Validation failed, entered data is incorrect",
+        500,
+        errors
+      );
+      throw error;
+    }
+    post.title = title;
+    post.content = content;
+    if (imageUrl !== "undefined") {
+      post.imageUrl = imageUrl;
+    }
+
+    const updatedPost = await post.save();
+
+    return {
+      ...updatedPost.toObject(),
+      _id: updatedPost._id.toString(),
+      createdAt: updatedPost.createdAt.toISOString(),
+      updatedAt: updatedPost.updatedAt.toISOString(),
+    };
+  },
 };
 
 export default resolvers;

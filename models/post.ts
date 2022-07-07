@@ -8,6 +8,7 @@ export interface PostType extends mongoose.Document {
   title: string;
   content: string;
   creator: {
+    _id: Types.ObjectId;
     name: string;
   };
   createdAt: Date;

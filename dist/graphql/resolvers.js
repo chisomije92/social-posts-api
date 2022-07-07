@@ -136,6 +136,39 @@ const resolvers = {
         }
         return Object.assign(Object.assign({}, post.toObject()), { _id: post._id.toString(), createdAt: post.createdAt.toISOString(), updatedAt: post.updatedAt.toISOString() });
     }),
+    updatePost: ({ postId, postInput }, req) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        if (!req.isAuth) {
+            throw new graphql_custom_1.CustomGraphQlError("Not authenticated", 401);
+        }
+        const post = yield post_1.default.findById(postId).populate("creator");
+        if (!post) {
+            throw new graphql_custom_1.CustomGraphQlError("Post does not exist", 404);
+        }
+        //
+        if (post.creator._id.toString() !== ((_a = req.userId) === null || _a === void 0 ? void 0 : _a.toString())) {
+            throw new graphql_custom_1.CustomGraphQlError("Not authorized", 403);
+        }
+        const { title, content, imageUrl } = postInput;
+        const errors = [];
+        if (validator_1.default.isEmpty(title) || !validator_1.default.isLength(title, { min: 5 })) {
+            errors.push({ message: "Title is required" });
+        }
+        if (validator_1.default.isEmpty(content)) {
+            errors.push({ message: "Content is required" });
+        }
+        if (errors.length > 0) {
+            const error = new graphql_custom_1.CustomGraphQlError("Validation failed, entered data is incorrect", 500, errors);
+            throw error;
+        }
+        post.title = title;
+        post.content = content;
+        if (imageUrl !== "undefined") {
+            post.imageUrl = imageUrl;
+        }
+        const updatedPost = yield post.save();
+        return Object.assign(Object.assign({}, updatedPost.toObject()), { _id: updatedPost._id.toString(), createdAt: updatedPost.createdAt.toISOString(), updatedAt: updatedPost.updatedAt.toISOString() });
+    }),
 };
 exports.default = resolvers;
 //# sourceMappingURL=resolvers.js.map
