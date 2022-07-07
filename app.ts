@@ -14,7 +14,9 @@ import { schema } from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import isAuth from "./middleware/is-auth";
+import fs from "fs";
 
+// console.log(path.join(__dirname, "../", "images"));
 dotenv.config();
 let conn_string: string;
 if (process.env.MONGO_CONN_STRING) {
@@ -60,7 +62,7 @@ app.use(
     fileFilter: fileFilter,
   }).single("image")
 );
-app.use("/images", express.static("images"));
+// app.use("/images", express.static("images"));
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -75,6 +77,23 @@ app.use((req, res, next) => {
 });
 
 app.use(isAuth);
+
+app.put("/post-image", (req, res, next) => {
+  if (!req.isAuth) {
+    throw new CustomError("Not authenticated", 401);
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided!" });
+  }
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+
+  return res.status(200).json({
+    message: "File stored!",
+    filePath: req.file.path.replace("\\", "/"),
+  });
+});
 
 // app.use("/feed", feedRoutes);
 // app.use("/auth", authRoutes);
@@ -124,3 +143,8 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+const clearImage = (imagePath: string) => {
+  imagePath = path.join(__dirname, "../", imagePath);
+  fs.unlink(imagePath, (err) => console.log(err));
+};
