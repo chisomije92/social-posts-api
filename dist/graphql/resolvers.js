@@ -182,7 +182,7 @@ const resolvers = {
         if (post.creator.toString() !== ((_b = req.userId) === null || _b === void 0 ? void 0 : _b.toString())) {
             throw new graphql_custom_1.CustomGraphQlError("Not authorized", 403);
         }
-        (0, file_1.clearImage)(post.imageUrl);
+        (0, file_1.clearImage)(post.imageUrl, true);
         yield post.remove();
         const user = yield user_1.default.findById(req.userId);
         user === null || user === void 0 ? void 0 : user.posts.pull(postId);

@@ -14,10 +14,9 @@ import { schema } from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import isAuth from "./middleware/is-auth";
-import fs from "fs";
+
 import { clearImage } from "./utils/file";
 
-// console.log(path.join(__dirname, "../", "images"));
 dotenv.config();
 let conn_string: string;
 if (process.env.MONGO_CONN_STRING) {
@@ -63,7 +62,7 @@ app.use(
     fileFilter: fileFilter,
   }).single("image")
 );
-// app.use("/images", express.static("images"));
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -87,7 +86,7 @@ app.put("/post-image", (req, res, next) => {
     return res.status(200).json({ message: "No file provided!" });
   }
   if (req.body.oldPath) {
-    clearImage(req.body.oldPath);
+    clearImage(req.body.oldPath, false);
   }
 
   return res.status(200).json({

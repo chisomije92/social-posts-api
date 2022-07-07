@@ -229,7 +229,7 @@ const resolvers: any = {
     if (post.creator.toString() !== req.userId?.toString()) {
       throw new CustomGraphQlError("Not authorized", 403);
     }
-    clearImage(post.imageUrl);
+    clearImage(post.imageUrl, true);
     await post.remove();
     const user = await User.findById(req.userId);
     user?.posts.pull(postId);

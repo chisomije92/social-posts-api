@@ -16,7 +16,6 @@ const schema_1 = require("./graphql/schema");
 const resolvers_1 = __importDefault(require("./graphql/resolvers"));
 const is_auth_1 = __importDefault(require("./middleware/is-auth"));
 const file_1 = require("./utils/file");
-// console.log(path.join(__dirname, "../", "images"));
 dotenv_1.default.config();
 let conn_string;
 if (process.env.MONGO_CONN_STRING) {
@@ -50,7 +49,6 @@ app.use((0, multer_1.default)({
     storage: fileStorage,
     fileFilter: fileFilter,
 }).single("image"));
-// app.use("/images", express.static("images"));
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, PATCH, DELETE");
@@ -69,7 +67,7 @@ app.put("/post-image", (req, res, next) => {
         return res.status(200).json({ message: "No file provided!" });
     }
     if (req.body.oldPath) {
-        (0, file_1.clearImage)(req.body.oldPath);
+        (0, file_1.clearImage)(req.body.oldPath, false);
     }
     return res.status(200).json({
         message: "File stored!",
