@@ -107,7 +107,6 @@ const resolvers = {
     }),
     posts: ({ page }, req) => __awaiter(void 0, void 0, void 0, function* () {
         if (!req.isAuth) {
-            console.log("Not authenticated");
             throw new graphql_custom_1.CustomGraphQlError("Not authenticated", 401);
         }
         if (!page) {

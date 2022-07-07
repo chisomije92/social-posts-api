@@ -130,7 +130,6 @@ const resolvers: any = {
 
   posts: async ({ page }: any, req: Request) => {
     if (!req.isAuth) {
-      console.log("Not authenticated");
       throw new CustomGraphQlError("Not authenticated", 401);
     }
 
