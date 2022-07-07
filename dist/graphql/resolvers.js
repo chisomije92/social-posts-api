@@ -85,9 +85,6 @@ const resolvers = {
         if (validator_1.default.isEmpty(content)) {
             errors.push({ message: "Content is required" });
         }
-        // if (!validator.isURL(imageUrl)) {
-        //   errors.push({ message: "Image url is invalid" });
-        // }
         if (errors.length > 0) {
             const error = new graphql_custom_1.CustomGraphQlError("Validation failed, entered data is incorrect", 500, errors);
             throw error;
@@ -105,7 +102,7 @@ const resolvers = {
         const createdPost = yield post.save();
         user.posts.push(createdPost);
         yield user.save();
-        return Object.assign(Object.assign({}, createdPost.toObject()), { _id: createdPost._id.toString(), createdAt: createdPost.createdAt, updatedAt: createdPost.updatedAt });
+        return Object.assign(Object.assign({}, createdPost.toObject()), { _id: createdPost._id.toString(), createdAt: createdPost.createdAt.toISOString(), updatedAt: createdPost.updatedAt.toISOString() });
     }),
     posts: ({ page }, req) => __awaiter(void 0, void 0, void 0, function* () {
         if (!req.isAuth) {
@@ -124,10 +121,20 @@ const resolvers = {
             .limit(perPage);
         return {
             posts: posts.map((post) => {
-                return Object.assign(Object.assign({}, post.toObject()), { _id: post._id.toString(), createdAt: post.createdAt, updatedAt: post.updatedAt });
+                return Object.assign(Object.assign({}, post.toObject()), { _id: post._id.toString(), createdAt: post.createdAt.toISOString(), updatedAt: post.updatedAt.toISOString() });
             }),
             totalPosts: totalPosts,
         };
+    }),
+    post: ({ postId }, req) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!req.isAuth) {
+            throw new graphql_custom_1.CustomGraphQlError("Not authenticated", 401);
+        }
+        const post = yield post_1.default.findById(postId).populate("creator");
+        if (!post) {
+            throw new graphql_custom_1.CustomGraphQlError("Post does not exist", 404);
+        }
+        return Object.assign(Object.assign({}, post.toObject()), { _id: post._id.toString(), createdAt: post.createdAt.toISOString(), updatedAt: post.updatedAt.toISOString() });
     }),
 };
 exports.default = resolvers;

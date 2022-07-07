@@ -10,8 +10,8 @@ export interface PostType extends mongoose.Document {
   creator: {
     name: string;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const PostSchema = new Schema(

@@ -95,9 +95,6 @@ const resolvers: any = {
     if (validator.isEmpty(content)) {
       errors.push({ message: "Content is required" });
     }
-    // if (!validator.isURL(imageUrl)) {
-    //   errors.push({ message: "Image url is invalid" });
-    // }
 
     if (errors.length > 0) {
       const error = new CustomGraphQlError(
@@ -125,8 +122,8 @@ const resolvers: any = {
     return {
       ...createdPost.toObject(),
       _id: createdPost._id.toString(),
-      createdAt: createdPost.createdAt,
-      updatedAt: createdPost.updatedAt,
+      createdAt: createdPost.createdAt.toISOString(),
+      updatedAt: createdPost.updatedAt.toISOString(),
     };
   },
 
@@ -151,11 +148,27 @@ const resolvers: any = {
         return {
           ...post.toObject(),
           _id: post._id.toString(),
-          createdAt: post.createdAt,
-          updatedAt: post.updatedAt,
+          createdAt: post.createdAt.toISOString(),
+          updatedAt: post.updatedAt.toISOString(),
         };
       }),
       totalPosts: totalPosts,
+    };
+  },
+
+  post: async ({ postId }: any, req: Request) => {
+    if (!req.isAuth) {
+      throw new CustomGraphQlError("Not authenticated", 401);
+    }
+    const post = await Post.findById(postId).populate("creator");
+    if (!post) {
+      throw new CustomGraphQlError("Post does not exist", 404);
+    }
+    return {
+      ...post.toObject(),
+      _id: post._id.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
     };
   },
 };
