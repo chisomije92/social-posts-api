@@ -19,6 +19,7 @@ const validator_1 = __importDefault(require("validator"));
 const graphql_custom_1 = require("../utils/graphql-custom");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const file_1 = require("../utils/file");
 dotenv_1.default.config();
 let secret;
 if (process.env.JWT_SECRET) {
@@ -168,6 +169,25 @@ const resolvers = {
         }
         const updatedPost = yield post.save();
         return Object.assign(Object.assign({}, updatedPost.toObject()), { _id: updatedPost._id.toString(), createdAt: updatedPost.createdAt.toISOString(), updatedAt: updatedPost.updatedAt.toISOString() });
+    }),
+    deletePost: ({ postId }, req) => __awaiter(void 0, void 0, void 0, function* () {
+        var _b;
+        if (!req.isAuth) {
+            throw new graphql_custom_1.CustomGraphQlError("Not authenticated", 401);
+        }
+        const post = yield post_1.default.findById(postId);
+        if (!post) {
+            throw new graphql_custom_1.CustomGraphQlError("Post does not exist", 404);
+        }
+        if (post.creator.toString() !== ((_b = req.userId) === null || _b === void 0 ? void 0 : _b.toString())) {
+            throw new graphql_custom_1.CustomGraphQlError("Not authorized", 403);
+        }
+        (0, file_1.clearImage)(post.imageUrl);
+        yield post.remove();
+        const user = yield user_1.default.findById(req.userId);
+        user === null || user === void 0 ? void 0 : user.posts.pull(postId);
+        yield (user === null || user === void 0 ? void 0 : user.save());
+        return true;
     }),
 };
 exports.default = resolvers;

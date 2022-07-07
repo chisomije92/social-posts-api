@@ -15,6 +15,7 @@ import resolvers from "./graphql/resolvers";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import isAuth from "./middleware/is-auth";
 import fs from "fs";
+import { clearImage } from "./utils/file";
 
 // console.log(path.join(__dirname, "../", "images"));
 dotenv.config();
@@ -143,8 +144,3 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-const clearImage = (imagePath: string) => {
-  imagePath = path.join(__dirname, "../", imagePath);
-  fs.unlink(imagePath, (err) => console.log(err));
-};

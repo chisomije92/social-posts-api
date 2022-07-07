@@ -9,7 +9,7 @@ export interface UserType extends mongoose.Document {
   password: string;
   status: string;
   name: string;
-  posts: PostType[];
+  posts: Types.DocumentArray<PostType>;
 }
 
 const UserSchema = new Schema({

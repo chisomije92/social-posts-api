@@ -15,7 +15,7 @@ const express_graphql_1 = require("express-graphql");
 const schema_1 = require("./graphql/schema");
 const resolvers_1 = __importDefault(require("./graphql/resolvers"));
 const is_auth_1 = __importDefault(require("./middleware/is-auth"));
-const fs_1 = __importDefault(require("fs"));
+const file_1 = require("./utils/file");
 // console.log(path.join(__dirname, "../", "images"));
 dotenv_1.default.config();
 let conn_string;
@@ -69,7 +69,7 @@ app.put("/post-image", (req, res, next) => {
         return res.status(200).json({ message: "No file provided!" });
     }
     if (req.body.oldPath) {
-        clearImage(req.body.oldPath);
+        (0, file_1.clearImage)(req.body.oldPath);
     }
     return res.status(200).json({
         message: "File stored!",
@@ -113,8 +113,4 @@ mongoose_1.default
     .catch((err) => {
     console.log(err);
 });
-const clearImage = (imagePath) => {
-    imagePath = path_1.default.join(__dirname, "../", imagePath);
-    fs_1.default.unlink(imagePath, (err) => console.log(err));
-};
 //# sourceMappingURL=app.js.map

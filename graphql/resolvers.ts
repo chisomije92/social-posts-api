@@ -6,6 +6,7 @@ import validator from "validator";
 import { CustomGraphQlError } from "../utils/graphql-custom";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { clearImage } from "../utils/file";
 
 dotenv.config();
 let secret: any;
@@ -215,6 +216,25 @@ const resolvers: any = {
       createdAt: updatedPost.createdAt.toISOString(),
       updatedAt: updatedPost.updatedAt.toISOString(),
     };
+  },
+
+  deletePost: async ({ postId }: any, req: Request) => {
+    if (!req.isAuth) {
+      throw new CustomGraphQlError("Not authenticated", 401);
+    }
+    const post = await Post.findById(postId);
+    if (!post) {
+      throw new CustomGraphQlError("Post does not exist", 404);
+    }
+    if (post.creator.toString() !== req.userId?.toString()) {
+      throw new CustomGraphQlError("Not authorized", 403);
+    }
+    clearImage(post.imageUrl);
+    await post.remove();
+    const user = await User.findById(req.userId);
+    user?.posts.pull(postId);
+    await user?.save();
+    return true;
   },
 };
 

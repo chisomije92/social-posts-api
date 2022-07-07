@@ -48,6 +48,7 @@ exports.schema = (0, graphql_1.buildSchema)(`
         createUser(userInput: UserInputData): User!
         createPost(postInput: PostInputData): Post!
         updatePost(postId: ID!, postInput: PostInputData!): Post!
+        deletePost(postId: ID!): Boolean!
    } 
    
     type RootQuery {
