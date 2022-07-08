@@ -12,7 +12,7 @@ import { CustomError } from "./utils/custom-error";
 import { graphqlHTTP } from "express-graphql";
 import { schema } from "./graphql/schema";
 import resolvers from "./graphql/resolvers";
-import { GraphQLError, GraphQLFormattedError } from "graphql";
+import { GraphQLError } from "graphql";
 import isAuth from "./middleware/is-auth";
 
 import { clearImage } from "./utils/file";
