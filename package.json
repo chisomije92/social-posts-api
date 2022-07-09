@@ -7,7 +7,7 @@
     "start": "node dist/app.js"
   },
   "engines": {
-    "node": ">=16.13.1",
+    "node": "16.x",
     "npm": "8.12.2"
   },
   "author": "Chisom Ijeomah",
