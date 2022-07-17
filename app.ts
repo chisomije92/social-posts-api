@@ -1,8 +1,6 @@
 import express from "express";
-import feedRoutes from "./routes/feed";
-import authRoutes from "./routes/auth";
 import { Request, Response, NextFunction } from "express";
-// import bodyParser from "body-parser";
+
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import multer from "multer";
@@ -95,8 +93,6 @@ app.put("/post-image", (req, res, next) => {
   });
 });
 
-// app.use("/feed", feedRoutes);
-// app.use("/auth", authRoutes);
 app.use(
   "/graphql",
   graphqlHTTP({

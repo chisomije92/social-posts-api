@@ -6,7 +6,6 @@ import fs from "fs";
 import path from "path";
 import { Types } from "mongoose";
 import { CustomError } from "../utils/custom-error";
-// import { getIO } from "../socket";
 
 export const getPosts = async (
   req: Request,
@@ -19,7 +18,7 @@ export const getPosts = async (
   }
   const currentPage: number = queryPage || 1;
   const perPage = 2;
-  //   let totalItems: number;
+
   try {
     const totalItems = await Post.find().countDocuments();
     const posts = await Post.find()
@@ -73,16 +72,6 @@ export const createPost = async (
     const user = await User.findById(req.userId);
     user?.posts.push(post);
     await user?.save();
-    // getIO().emit("posts", {
-    //   action: "create",
-    //   post: {
-    //     ...post.toObject(),
-    //     creator: {
-    //       _id: req.userId,
-    //       name: user?.name,
-    //     },
-    //   },
-    // });
 
     res.status(201).json({
       message: "Post created successfully",
