@@ -141,6 +141,8 @@ The above GraphQL mutation will produce the following JSON response:
   }
   `  
 }
+
+N.B: Only an authenticated user can create, view and delete posts. Also, an authenticated user can only delete or edit posts they created.
       
 ```
 ## Support
