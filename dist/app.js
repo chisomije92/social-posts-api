@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-// import bodyParser from "body-parser";
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const multer_1 = __importDefault(require("multer"));
@@ -74,8 +73,6 @@ app.put("/post-image", (req, res, next) => {
         filePath: req.file.path.replace("\\", "/"),
     });
 });
-// app.use("/feed", feedRoutes);
-// app.use("/auth", authRoutes);
 app.use("/graphql", (0, express_graphql_1.graphqlHTTP)({
     schema: schema_1.schema,
     rootValue: resolvers_1.default,
