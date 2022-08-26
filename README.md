@@ -10,7 +10,7 @@ A GraphQL API that enables the creation, updating and deletion of posts. This pr
 
 ## QUERY
 
-Endpoint: https://social-posts-api.herokuapp.com/graphql
+Endpoint: https://social-posts-api.vercel.app/
 
 ### Sign Up
 
