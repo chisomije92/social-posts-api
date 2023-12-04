@@ -75,7 +75,8 @@ app.use((req, res, next) => {
 });
 
 app.use(isAuth);
-
+app.get('/"  (req, res, next) => {}
+        res.send('ok'))
 app.put("/post-image", (req, res, next) => {
   if (!req.isAuth) {
     throw new CustomError("Not authenticated", 401);
